@@ -68,16 +68,16 @@ import com.example.ui.components.KpiCard
 import com.example.ui.components.ResponsiveKpiGrid
 import com.example.ui.components.StatusBadge
 import com.example.ui.theme.GraphiteAccentViolet
-import com.example.ui.theme.GraphiteBlue
 import com.example.ui.theme.GraphiteBorder
 import com.example.ui.theme.GraphiteCard
 import com.example.ui.theme.GraphiteGreen
+import com.example.ui.theme.GraphiteKpiCard
 import com.example.ui.theme.GraphiteKpiDivider
 import com.example.ui.theme.GraphiteNavSurface
 import com.example.ui.theme.GraphiteOnAccent
 import com.example.ui.theme.GraphiteRed
-import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.theme.TabularNumberTextStyle
 import com.example.ui.viewmodel.UploadUiState
 import com.example.util.Formatters
@@ -132,6 +132,7 @@ fun UploadPortfolioScreen(
                             )
                         },
                         enabled = !uploadState.isUploading,
+                        shape = RoundedCornerShape(10.dp),
                         border = BorderStroke(1.dp, GraphiteBorder),
                         modifier = Modifier
                             .weight(1f)
@@ -145,7 +146,7 @@ fun UploadPortfolioScreen(
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Gallery", color = GraphiteTextPrimary)
+                        Text("Gallery", color = GraphiteTextPrimary, fontWeight = FontWeight.Medium)
                     }
 
                     OutlinedButton(
@@ -155,6 +156,7 @@ fun UploadPortfolioScreen(
                             cameraLauncher.launch(cameraUri)
                         },
                         enabled = !uploadState.isUploading,
+                        shape = RoundedCornerShape(10.dp),
                         border = BorderStroke(1.dp, GraphiteBorder),
                         modifier = Modifier
                             .weight(1f)
@@ -168,7 +170,7 @@ fun UploadPortfolioScreen(
                             modifier = Modifier.size(18.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Camera", color = GraphiteTextPrimary)
+                        Text("Camera", color = GraphiteTextPrimary, fontWeight = FontWeight.Medium)
                     }
                 }
 
@@ -208,7 +210,7 @@ fun UploadPortfolioScreen(
                             )
                             Text(
                                 text = "Uploading screenshot and running OCR extraction...",
-                                color = GraphiteTextMuted,
+                                color = GraphiteTextSecondary,
                                 fontSize = 12.sp,
                             )
                         }
@@ -221,6 +223,7 @@ fun UploadPortfolioScreen(
                         Button(
                             onClick = { onUpload(context) },
                             enabled = !uploadState.isUploading,
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = GraphiteAccentViolet,
                                 contentColor = GraphiteOnAccent,
@@ -253,6 +256,7 @@ fun UploadPortfolioScreen(
                         OutlinedButton(
                             onClick = onClear,
                             enabled = !uploadState.isUploading,
+                            shape = RoundedCornerShape(10.dp),
                             border = BorderStroke(1.dp, GraphiteBorder),
                             modifier = Modifier
                                 .heightIn(min = 48.dp)
@@ -261,43 +265,48 @@ fun UploadPortfolioScreen(
                             Icon(
                                 imageVector = Icons.Outlined.Close,
                                 contentDescription = "Clear image",
-                                tint = GraphiteTextMuted,
+                                tint = GraphiteTextSecondary,
                                 modifier = Modifier.size(18.dp),
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Clear", color = GraphiteTextMuted)
+                            Text("Clear", color = GraphiteTextSecondary)
                         }
                     }
                 } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(GraphiteNavSurface)
-                            .padding(vertical = 28.dp, horizontal = 16.dp),
-                        contentAlignment = Alignment.Center,
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = GraphiteNavSurface,
+                        border = BorderStroke(1.dp, GraphiteBorder),
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 28.dp, horizontal = 16.dp),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            Icon(
-                                imageVector = Icons.Outlined.CloudUpload,
-                                contentDescription = null,
-                                tint = GraphiteTextMuted,
-                                modifier = Modifier.size(28.dp),
-                            )
-                            Text(
-                                text = "No screenshot selected",
-                                color = GraphiteTextPrimary,
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Medium,
-                            )
-                            Text(
-                                text = "Choose from Gallery or capture with Camera above",
-                                color = GraphiteTextMuted,
-                                fontSize = 11.sp,
-                            )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CloudUpload,
+                                    contentDescription = null,
+                                    tint = GraphiteTextSecondary,
+                                    modifier = Modifier.size(28.dp),
+                                )
+                                Text(
+                                    text = "No screenshot selected",
+                                    color = GraphiteTextPrimary,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                )
+                                Text(
+                                    text = "Choose from Gallery or capture with Camera above",
+                                    color = GraphiteTextSecondary,
+                                    fontSize = 12.sp,
+                                )
+                            }
                         }
                     }
                 }
@@ -377,7 +386,7 @@ fun UploadPortfolioScreen(
                             value = Formatters.formatInr(totalRef),
                             supportingText = "Baseline cost basis",
                             icon = Icons.Outlined.Savings,
-                            iconTint = GraphiteBlue,
+                            iconTint = GraphiteTextSecondary,
                             modifier = mod,
                         )
                     },
@@ -404,17 +413,18 @@ fun UploadPortfolioScreen(
                     headerAction = {
                         OutlinedButton(
                             onClick = onNavigateToDashboard,
+                            shape = RoundedCornerShape(10.dp),
                             border = BorderStroke(1.dp, GraphiteBorder),
-                            modifier = Modifier.heightIn(min = 40.dp),
+                            modifier = Modifier.heightIn(min = 44.dp),
                         ) {
-                            Text("View Dashboard", color = GraphiteAccentViolet, fontSize = 12.sp)
+                            Text("View Dashboard", color = GraphiteAccentViolet, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                         }
                     },
                 ) {
                     if (result.stocks.isEmpty()) {
                         Text(
                             text = "No stock rows returned in the OCR response.",
-                            color = GraphiteTextMuted,
+                            color = GraphiteTextSecondary,
                             fontSize = 13.sp,
                         )
                     }
@@ -432,16 +442,16 @@ fun UploadPortfolioScreen(
 fun ExtractedStockRowCard(stock: StockItem) {
     val pnlColor = if (stock.netDifference >= 0.0) GraphiteGreen else GraphiteRed
     Surface(
-        shape = RoundedCornerShape(12.dp),
-        color = GraphiteCard.copy(alpha = 0.65f),
-        border = BorderStroke(1.dp, GraphiteKpiDivider),
+        shape = RoundedCornerShape(14.dp),
+        color = GraphiteKpiCard,
+        border = BorderStroke(1.dp, GraphiteBorder),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -452,14 +462,14 @@ fun ExtractedStockRowCard(stock: StockItem) {
                     Text(
                         text = stock.company,
                         color = GraphiteTextPrimary,
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
                         text = "${Formatters.formatIndianNumber(stock.shares, maxDecimals = 4)} shares",
-                        style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                        style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteTextSecondary),
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {
@@ -474,8 +484,8 @@ fun ExtractedStockRowCard(stock: StockItem) {
                     Text(
                         text = "${Formatters.formatSignedInr(stock.netDifference)} (${Formatters.formatPercent(stock.returnPercent, signed = true)})",
                         style = TabularNumberTextStyle.copy(
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
                             color = pnlColor,
                         ),
                     )
@@ -488,11 +498,11 @@ fun ExtractedStockRowCard(stock: StockItem) {
             ) {
                 Text(
                     text = "Reference: ${Formatters.formatInr(stock.referenceValue)}",
-                    style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                    style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteTextSecondary),
                 )
                 Text(
                     text = "Current: ${Formatters.formatInr(stock.currentValue)}",
-                    style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                    style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteTextSecondary),
                 )
             }
         }

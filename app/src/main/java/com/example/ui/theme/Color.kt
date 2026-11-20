@@ -21,8 +21,8 @@ data class StockFolioColors(
     val amber: Color,
     val red: Color,
     val blue: Color,
-    val cyan: Color,
-    val pink: Color,
+    val slateChart: Color,
+    val softVioletChart: Color,
     val textPrimary: Color,
     val textSecondary: Color,
     val textMuted: Color,
@@ -30,49 +30,55 @@ data class StockFolioColors(
     val isDark: Boolean,
 )
 
+/**
+ * Midnight Finance – Premium Dark palette.
+ */
 val DarkStockFolioColors = StockFolioColors(
-    canvas = Color(0xFF050807),
-    navSurface = Color(0xFF0A0E0D),
-    kpiCard = Color(0xFF101514),
-    elevatedCard = Color(0xFF161D1B),
-    kpiDivider = Color(0xFF202927),
-    border = Color(0xFF202927),
+    canvas = Color(0xFF080D12),
+    navSurface = Color(0xFF0B1117),
+    kpiCard = Color(0xFF101820),
+    elevatedCard = Color(0xFF16202B),
+    kpiDivider = Color(0xFF202B36),
+    border = Color(0xFF202B36),
     accentViolet = Color(0xFFA855F7),
     accentVioletDeep = Color(0xFF9333EA),
-    onAccent = Color(0xFF050807),
-    green = Color(0xFF00D69A),
+    onAccent = Color(0xFF080D12),
+    green = Color(0xFF22C55E),
     amber = Color(0xFFF59E0B),
-    red = Color(0xFFF87171),
-    blue = Color(0xFF3B82F6),
-    cyan = Color(0xFF22D3EE),
-    pink = Color(0xFFEC4899),
-    textPrimary = Color(0xFFF5F7F6),
-    textSecondary = Color(0xFFD1D7D5),
-    textMuted = Color(0xFF929B98),
-    textSubtle = Color(0xFF6B7572),
+    red = Color(0xFFEF4444),
+    blue = Color(0xFF60A5FA),
+    slateChart = Color(0xFF94A3B8),
+    softVioletChart = Color(0xFFC084FC),
+    textPrimary = Color(0xFFF8FAFC),
+    textSecondary = Color(0xFFA1AAB5),
+    textMuted = Color(0xFF748091),
+    textSubtle = Color(0xFF748091),
     isDark = true,
 )
 
+/**
+ * Clean Wealth Light palette matching Midnight Finance semantics.
+ */
 val LightStockFolioColors = StockFolioColors(
-    canvas = Color(0xFFF4F7F6),
+    canvas = Color(0xFFF5F7FA),
     navSurface = Color(0xFFFFFFFF),
     kpiCard = Color(0xFFFFFFFF),
-    elevatedCard = Color(0xFFEEF2F1),
-    kpiDivider = Color(0xFFDCE3E0),
-    border = Color(0xFFCBD5D1),
+    elevatedCard = Color(0xFFEEF2F6),
+    kpiDivider = Color(0xFFE2E8F0),
+    border = Color(0xFFCBD5E1),
     accentViolet = Color(0xFF9333EA),
     accentVioletDeep = Color(0xFF7E22CE),
     onAccent = Color(0xFFFFFFFF),
-    green = Color(0xFF059669),
+    green = Color(0xFF16A34A),
     amber = Color(0xFFD97706),
     red = Color(0xFFDC2626),
     blue = Color(0xFF2563EB),
-    cyan = Color(0xFF0891B2),
-    pink = Color(0xFFDB2777),
-    textPrimary = Color(0xFF0B1210),
-    textSecondary = Color(0xFF2C3835),
-    textMuted = Color(0xFF55635F),
-    textSubtle = Color(0xFF73827D),
+    slateChart = Color(0xFF64748B),
+    softVioletChart = Color(0xFFA855F7),
+    textPrimary = Color(0xFF0F172A),
+    textSecondary = Color(0xFF475569),
+    textMuted = Color(0xFF64748B),
+    textSubtle = Color(0xFF64748B),
     isDark = false,
 )
 
@@ -118,12 +124,6 @@ val GraphiteRed: Color
 val GraphiteBlue: Color
     @Composable @ReadOnlyComposable get() = LocalStockFolioColors.current.blue
 
-val GraphiteCyan: Color
-    @Composable @ReadOnlyComposable get() = LocalStockFolioColors.current.cyan
-
-val GraphitePink: Color
-    @Composable @ReadOnlyComposable get() = LocalStockFolioColors.current.pink
-
 val GraphiteTextPrimary: Color
     @Composable @ReadOnlyComposable get() = LocalStockFolioColors.current.textPrimary
 
@@ -139,5 +139,5 @@ val GraphiteTextSubtle: Color
 val ChartPalette: List<Color>
     @Composable @ReadOnlyComposable get() {
         val c = LocalStockFolioColors.current
-        return listOf(c.accentViolet, c.blue, c.cyan, c.amber, c.pink)
+        return listOf(c.green, c.accentViolet, c.blue, c.amber, c.slateChart)
     }

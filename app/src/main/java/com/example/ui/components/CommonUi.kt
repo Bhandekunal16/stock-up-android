@@ -47,12 +47,11 @@ import com.example.ui.theme.GraphiteAccentViolet
 import com.example.ui.theme.GraphiteBorder
 import com.example.ui.theme.GraphiteCard
 import com.example.ui.theme.GraphiteKpiCard
-import com.example.ui.theme.GraphiteKpiDivider
 import com.example.ui.theme.GraphiteNavSurface
 import com.example.ui.theme.GraphiteOnAccent
 import com.example.ui.theme.GraphiteRed
-import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 
 @Composable
 fun GraphiteSectionCard(
@@ -66,14 +65,13 @@ fun GraphiteSectionCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         color = GraphiteKpiCard,
-        border = BorderStroke(1.dp, GraphiteKpiDivider),
-        shadowElevation = 1.dp,
+        border = BorderStroke(1.dp, GraphiteBorder),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             if (title != null || headerAction != null) {
                 Row(
@@ -85,7 +83,7 @@ fun GraphiteSectionCard(
                         modifier = Modifier
                             .weight(1f)
                             .padding(end = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         if (title != null) {
                             Text(
@@ -100,7 +98,7 @@ fun GraphiteSectionCard(
                             Text(
                                 text = subtitle,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = GraphiteTextMuted,
+                                color = GraphiteTextSecondary,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -124,8 +122,8 @@ fun StatusBadge(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        color = color.copy(alpha = 0.14f),
-        border = BorderStroke(1.dp, color.copy(alpha = 0.35f)),
+        color = color.copy(alpha = 0.12f),
+        border = BorderStroke(1.dp, color.copy(alpha = 0.30f)),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -172,18 +170,18 @@ fun SegmentedTextToggle(
                     shape = RoundedCornerShape(8.dp),
                     color = if (selected) GraphiteAccentViolet else Color.Transparent,
                     modifier = Modifier
-                        .heightIn(min = 36.dp)
+                        .heightIn(min = 38.dp)
                         .testTag("toggle_${label.lowercase().replace(" ", "_")}"),
                 ) {
                     Box(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
                             text = label,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (selected) GraphiteOnAccent else GraphiteTextMuted,
+                            color = if (selected) GraphiteOnAccent else GraphiteTextSecondary,
                             maxLines = 1,
                             softWrap = false,
                         )
@@ -222,7 +220,7 @@ fun IconSegmentedToggle(
                     Icon(
                         imageVector = icon,
                         contentDescription = description,
-                        tint = if (selected) GraphiteOnAccent else GraphiteTextMuted,
+                        tint = if (selected) GraphiteOnAccent else GraphiteTextSecondary,
                         modifier = Modifier.size(18.dp),
                     )
                 }
@@ -253,7 +251,7 @@ fun LoadingStateBox(
             )
             Text(
                 text = message,
-                color = GraphiteTextMuted,
+                color = GraphiteTextSecondary,
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -270,8 +268,8 @@ fun ErrorStateBanner(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = GraphiteRed.copy(alpha = 0.12f),
-        border = BorderStroke(1.dp, GraphiteRed.copy(alpha = 0.45f)),
+        color = GraphiteRed.copy(alpha = 0.10f),
+        border = BorderStroke(1.dp, GraphiteRed.copy(alpha = 0.35f)),
     ) {
         Row(
             modifier = Modifier
@@ -305,10 +303,10 @@ fun ErrorStateBanner(
             if (onRetry != null) {
                 OutlinedButton(
                     onClick = onRetry,
-                    border = BorderStroke(1.dp, GraphiteRed.copy(alpha = 0.6f)),
+                    border = BorderStroke(1.dp, GraphiteRed.copy(alpha = 0.5f)),
                     modifier = Modifier.heightIn(min = 48.dp),
                 ) {
-                    Text("Retry", color = GraphiteRed, fontSize = 12.sp)
+                    Text("Retry", color = GraphiteRed, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -331,9 +329,9 @@ fun EmptyStateBox(
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(14.dp),
             color = GraphiteKpiCard,
-            border = BorderStroke(1.dp, GraphiteKpiDivider),
+            border = BorderStroke(1.dp, GraphiteBorder),
             modifier = Modifier.fillMaxWidth(),
         ) {
             Column(
@@ -346,7 +344,7 @@ fun EmptyStateBox(
                 Box(
                     modifier = Modifier
                         .size(52.dp)
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(RoundedCornerShape(12.dp))
                         .background(GraphiteCard),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -366,7 +364,7 @@ fun EmptyStateBox(
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = GraphiteTextMuted,
+                    color = GraphiteTextSecondary,
                     textAlign = TextAlign.Center,
                 )
                 if (actionLabel != null && onAction != null) {
@@ -377,6 +375,7 @@ fun EmptyStateBox(
                             containerColor = GraphiteAccentViolet,
                             contentColor = GraphiteOnAccent,
                         ),
+                        shape = RoundedCornerShape(10.dp),
                         modifier = Modifier.heightIn(min = 48.dp),
                     ) {
                         Text(actionLabel, fontWeight = FontWeight.SemiBold)
@@ -400,9 +399,9 @@ fun FullScreenErrorState(
         contentAlignment = Alignment.Center,
     ) {
         Surface(
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(14.dp),
             color = GraphiteKpiCard,
-            border = BorderStroke(1.dp, GraphiteRed.copy(alpha = 0.4f)),
+            border = BorderStroke(1.dp, GraphiteRed.copy(alpha = 0.35f)),
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -423,7 +422,7 @@ fun FullScreenErrorState(
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = GraphiteTextMuted,
+                    color = GraphiteTextSecondary,
                     textAlign = TextAlign.Center,
                 )
                 Button(
@@ -432,6 +431,7 @@ fun FullScreenErrorState(
                         containerColor = GraphiteAccentViolet,
                         contentColor = GraphiteOnAccent,
                     ),
+                    shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .heightIn(min = 48.dp)
                         .testTag("retry_button"),

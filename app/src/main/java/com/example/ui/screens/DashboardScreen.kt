@@ -1,14 +1,10 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.automirrored.outlined.TrendingDown
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
@@ -40,10 +36,10 @@ import com.example.ui.components.SegmentedTextToggle
 import com.example.ui.components.StockLineChart
 import com.example.ui.theme.ChartPalette
 import com.example.ui.theme.GraphiteAccentViolet
-import com.example.ui.theme.GraphiteBlue
 import com.example.ui.theme.GraphiteGreen
 import com.example.ui.theme.GraphiteRed
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.viewmodel.PortfolioLoadState
 import com.example.ui.viewmodel.PortfolioUiState
 import com.example.util.Formatters
@@ -123,7 +119,7 @@ private fun DashboardContent(
                 supportingText = "Baseline invested capital",
                 icon = Icons.Outlined.Savings,
                 valueColor = GraphiteTextPrimary,
-                iconTint = GraphiteBlue,
+                iconTint = GraphiteTextSecondary,
                 modifier = mod,
                 testTag = "kpi_reference_value",
             )
@@ -147,7 +143,7 @@ private fun DashboardContent(
                 supportingText = "Tap to view holdings",
                 icon = Icons.Outlined.Layers,
                 valueColor = GraphiteTextPrimary,
-                iconTint = GraphiteBlue,
+                iconTint = GraphiteAccentViolet,
                 modifier = mod,
                 testTag = "kpi_total_stocks",
                 onClick = onNavigateToHoldings,
@@ -160,7 +156,7 @@ private fun DashboardContent(
                 supportingText = "${latest.date} • Tap to inspect",
                 icon = Icons.Outlined.CalendarToday,
                 valueColor = GraphiteTextPrimary,
-                iconTint = GraphiteBlue,
+                iconTint = GraphiteTextSecondary,
                 modifier = mod,
                 testTag = "kpi_last_updated",
                 onClick = { onNavigateToSnapshot(latest.date) },
@@ -182,12 +178,13 @@ private fun DashboardContent(
         }
 
         // Chart 1: Portfolio Performance Trend
+        // Uses Green (#22C55E) for Current Value and Muted Violet (#A855F7) for Reference Value
         item {
             val dateLabels = remember(snapshots) {
                 snapshots.map { Formatters.formatShortAxisDate(it.date) }
             }
-            val currentLineColor = GraphiteAccentViolet
-            val refLineColor = GraphiteBlue
+            val currentLineColor = GraphiteGreen
+            val refLineColor = GraphiteAccentViolet.copy(alpha = 0.78f)
             val positiveColor = GraphiteGreen
             val negativeColor = GraphiteRed
             val performanceSeries = remember(
@@ -313,8 +310,8 @@ private fun DashboardContent(
                     val labels = remember(sortedStocks) {
                         sortedStocks.map { it.company.take(8) }
                     }
-                    val currentWeightColor = GraphiteAccentViolet
-                    val investedWeightColor = GraphiteBlue
+                    val currentWeightColor = GraphiteGreen
+                    val investedWeightColor = GraphiteAccentViolet.copy(alpha = 0.78f)
                     val weightSeries = remember(
                         sortedStocks,
                         totalCurrent,

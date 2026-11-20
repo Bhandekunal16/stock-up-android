@@ -2,13 +2,13 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,9 +34,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -52,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.PortfolioSnapshot
@@ -70,6 +69,7 @@ import com.example.ui.theme.GraphiteOnAccent
 import com.example.ui.theme.GraphiteRed
 import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.theme.TabularNumberTextStyle
 import com.example.ui.viewmodel.PortfolioLoadState
 import com.example.ui.viewmodel.PortfolioUiState
@@ -139,43 +139,25 @@ private fun HistoryContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        placeholder = { Text("Search date or stock...", color = GraphiteTextMuted) },
-                        leadingIcon = {
-                            Icon(Icons.Outlined.Search, contentDescription = "Search", tint = GraphiteTextMuted)
-                        },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = GraphiteAccentViolet,
-                            unfocusedBorderColor = GraphiteBorder,
-                            focusedContainerColor = GraphiteNavSurface,
-                            unfocusedContainerColor = GraphiteNavSurface,
-                            focusedTextColor = GraphiteTextPrimary,
-                            unfocusedTextColor = GraphiteTextPrimary,
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("history_search_input"),
-                    )
-
-                    if (snapshotsNewestFirst.size >= 2) {
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val compactWidth = maxWidth < 380.dp && snapshotsNewestFirst.size >= 2
+                if (compactWidth) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        HistorySearchField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                         Button(
                             onClick = { showCompareDialog = true },
+                            shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = GraphiteAccentViolet,
                                 contentColor = GraphiteOnAccent,
                             ),
                             modifier = Modifier
-                                .heightIn(min = 52.dp)
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp)
                                 .testTag("compare_snapshots_button"),
                         ) {
                             Icon(
@@ -184,7 +166,41 @@ private fun HistoryContent(
                                 modifier = Modifier.size(18.dp),
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Compare", fontWeight = FontWeight.SemiBold)
+                            Text("Compare Snapshots", fontWeight = FontWeight.SemiBold)
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        HistorySearchField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier.weight(1f),
+                        )
+
+                        if (snapshotsNewestFirst.size >= 2) {
+                            Button(
+                                onClick = { showCompareDialog = true },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = GraphiteAccentViolet,
+                                    contentColor = GraphiteOnAccent,
+                                ),
+                                modifier = Modifier
+                                    .heightIn(min = 52.dp)
+                                    .testTag("compare_snapshots_button"),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Outlined.CompareArrows,
+                                    contentDescription = "Compare snapshots",
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Compare", fontWeight = FontWeight.SemiBold, maxLines = 1)
+                            }
                         }
                     }
                 }
@@ -211,6 +227,33 @@ private fun HistoryContent(
 }
 
 @Composable
+private fun HistorySearchField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text("Search date or stock...", color = GraphiteTextMuted) },
+        leadingIcon = {
+            Icon(Icons.Outlined.Search, contentDescription = "Search", tint = GraphiteTextSecondary)
+        },
+        singleLine = true,
+        shape = RoundedCornerShape(12.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = GraphiteAccentViolet,
+            unfocusedBorderColor = GraphiteBorder,
+            focusedContainerColor = GraphiteNavSurface,
+            unfocusedContainerColor = GraphiteNavSurface,
+            focusedTextColor = GraphiteTextPrimary,
+            unfocusedTextColor = GraphiteTextPrimary,
+        ),
+        modifier = modifier.testTag("history_search_input"),
+    )
+}
+
+@Composable
 private fun SnapshotHistoryRowCard(
     snapshot: PortfolioSnapshot,
     onClick: () -> Unit,
@@ -222,7 +265,7 @@ private fun SnapshotHistoryRowCard(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
         color = GraphiteKpiCard,
-        border = BorderStroke(1.dp, GraphiteKpiDivider),
+        border = BorderStroke(1.dp, GraphiteBorder),
         modifier = Modifier
             .fillMaxWidth()
             .testTag("snapshot_card_${snapshot.date}"),
@@ -230,8 +273,8 @@ private fun SnapshotHistoryRowCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -239,8 +282,9 @@ private fun SnapshotHistoryRowCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.CalendarToday,
@@ -248,16 +292,20 @@ private fun SnapshotHistoryRowCard(
                         tint = GraphiteAccentViolet,
                         modifier = Modifier.size(18.dp),
                     )
-                    Column {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(
                             text = Formatters.formatDateLabel(snapshot.date),
                             color = GraphiteTextPrimary,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             text = "${snapshot.date} • ${snapshot.stocks.size} holdings",
-                            style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                            style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteTextSecondary),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -272,7 +320,7 @@ private fun SnapshotHistoryRowCard(
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                         contentDescription = "Inspect snapshot",
-                        tint = GraphiteTextMuted,
+                        tint = GraphiteTextSecondary,
                     )
                 }
             }
@@ -283,8 +331,8 @@ private fun SnapshotHistoryRowCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Column {
-                    Text("Current", color = GraphiteTextMuted, fontSize = 11.sp)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text("Current", color = GraphiteTextSecondary, fontSize = 12.sp)
                     Text(
                         text = Formatters.formatInr(snapshot.totalCurrentValue),
                         style = TabularNumberTextStyle.copy(
@@ -292,10 +340,11 @@ private fun SnapshotHistoryRowCard(
                             fontWeight = FontWeight.Bold,
                             color = GraphiteTextPrimary,
                         ),
+                        maxLines = 1,
                     )
                 }
-                Column {
-                    Text("Reference", color = GraphiteTextMuted, fontSize = 11.sp)
+                Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Reference", color = GraphiteTextSecondary, fontSize = 12.sp)
                     Text(
                         text = Formatters.formatInr(snapshot.totalReferenceValue),
                         style = TabularNumberTextStyle.copy(
@@ -303,10 +352,11 @@ private fun SnapshotHistoryRowCard(
                             fontWeight = FontWeight.Medium,
                             color = GraphiteTextPrimary,
                         ),
+                        maxLines = 1,
                     )
                 }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text("Net P&L", color = GraphiteTextMuted, fontSize = 11.sp)
+                Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+                    Text("Net P&L", color = GraphiteTextSecondary, fontSize = 12.sp)
                     Text(
                         text = Formatters.formatSignedInr(pnl),
                         style = TabularNumberTextStyle.copy(
@@ -314,6 +364,7 @@ private fun SnapshotHistoryRowCard(
                             fontWeight = FontWeight.SemiBold,
                             color = pnlColor,
                         ),
+                        maxLines = 1,
                     )
                 }
             }
@@ -405,7 +456,7 @@ private fun CompareSnapshotsDialog(
 
                 Text(
                     text = "Holdings Value Changes (B - A)",
-                    color = GraphiteTextMuted,
+                    color = GraphiteTextSecondary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -423,6 +474,8 @@ private fun CompareSnapshotsDialog(
                             color = GraphiteTextPrimary,
                             fontSize = 12.sp,
                             modifier = Modifier.weight(1f).padding(end = 8.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                         Text(
                             text = Formatters.formatSignedInr(diff),
@@ -455,7 +508,7 @@ private fun CompareDeltaRow(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = label, color = GraphiteTextMuted, fontSize = 12.sp)
+        Text(text = label, color = GraphiteTextSecondary, fontSize = 12.sp)
         Text(
             text = value,
             style = TabularNumberTextStyle.copy(
@@ -484,7 +537,7 @@ private fun SnapshotDateSelector(
             value = snapshots[selectedIndex].date,
             onValueChange = {},
             readOnly = true,
-            label = { Text(label, color = GraphiteTextMuted, fontSize = 12.sp) },
+            label = { Text(label, color = GraphiteTextSecondary, fontSize = 12.sp) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = GraphiteAccentViolet,

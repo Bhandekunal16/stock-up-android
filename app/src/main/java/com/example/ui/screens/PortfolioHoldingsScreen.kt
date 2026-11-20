@@ -7,13 +7,10 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -58,9 +55,7 @@ import com.example.ui.components.KpiCard
 import com.example.ui.components.LoadingStateBox
 import com.example.ui.components.ResponsiveKpiGrid
 import com.example.ui.theme.GraphiteAccentViolet
-import com.example.ui.theme.GraphiteBlue
 import com.example.ui.theme.GraphiteBorder
-import com.example.ui.theme.GraphiteCard
 import com.example.ui.theme.GraphiteGreen
 import com.example.ui.theme.GraphiteKpiCard
 import com.example.ui.theme.GraphiteKpiDivider
@@ -69,6 +64,7 @@ import com.example.ui.theme.GraphiteOnAccent
 import com.example.ui.theme.GraphiteRed
 import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.theme.TabularNumberTextStyle
 import com.example.ui.viewmodel.PortfolioLoadState
 import com.example.ui.viewmodel.PortfolioUiState
@@ -82,7 +78,6 @@ enum class HoldingSortField(val label: String) {
     NAME("Name"),
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PortfolioHoldingsScreen(
     uiState: PortfolioUiState,
@@ -158,7 +153,7 @@ private fun HoldingsContent(
                 value = Formatters.formatInr(latest.totalReferenceValue),
                 supportingText = "Total invested baseline",
                 icon = Icons.Outlined.Savings,
-                iconTint = GraphiteBlue,
+                iconTint = GraphiteTextSecondary,
                 modifier = mod,
             )
         },
@@ -202,7 +197,7 @@ private fun HoldingsContent(
                     onValueChange = { searchQuery = it },
                     placeholder = { Text("Search holdings by company...", color = GraphiteTextMuted) },
                     leadingIcon = {
-                        Icon(Icons.Outlined.Search, contentDescription = "Search", tint = GraphiteTextMuted)
+                        Icon(Icons.Outlined.Search, contentDescription = "Search", tint = GraphiteTextSecondary)
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp),
@@ -241,12 +236,18 @@ private fun HoldingsContent(
                                         sortDescending = field != HoldingSortField.NAME
                                     }
                                 },
-                                label = { Text(field.label, fontSize = 12.sp) },
+                                label = {
+                                    Text(
+                                        text = field.label,
+                                        fontSize = 12.sp,
+                                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                                    )
+                                },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = GraphiteAccentViolet,
                                     selectedLabelColor = GraphiteOnAccent,
                                     containerColor = GraphiteKpiCard,
-                                    labelColor = GraphiteTextMuted,
+                                    labelColor = GraphiteTextSecondary,
                                 ),
                                 border = FilterChipDefaults.filterChipBorder(
                                     enabled = true,
@@ -302,13 +303,13 @@ fun HoldingItemCard(
     Surface(
         shape = RoundedCornerShape(14.dp),
         color = GraphiteKpiCard,
-        border = BorderStroke(1.dp, GraphiteKpiDivider),
+        border = BorderStroke(1.dp, GraphiteBorder),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(
@@ -318,7 +319,7 @@ fun HoldingItemCard(
             ) {
                 Column(
                     modifier = Modifier.weight(1f).padding(end = 10.dp),
-                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Text(
                         text = stock.company,
@@ -331,11 +332,17 @@ fun HoldingItemCard(
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Text(
                             text = "${Formatters.formatIndianNumber(stock.shares, maxDecimals = 4)} shares",
-                            style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteTextMuted),
+                            style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteTextSecondary),
+                            maxLines = 1,
                         )
                         Text(
-                            text = "• Weight ${Formatters.formatPercent(weightPercent, decimals = 1)}",
-                            style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteAccentViolet),
+                            text = "• ${Formatters.formatPercent(weightPercent, decimals = 1)}",
+                            style = TabularNumberTextStyle.copy(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = GraphiteAccentViolet,
+                            ),
+                            maxLines = 1,
                         )
                     }
                 }
@@ -348,6 +355,7 @@ fun HoldingItemCard(
                             fontWeight = FontWeight.Bold,
                             color = GraphiteTextPrimary,
                         ),
+                        maxLines = 1,
                     )
                     Text(
                         text = "${Formatters.formatSignedInr(pnl)} (${Formatters.formatPercent(stock.returnPercent, signed = true)})",
@@ -356,6 +364,7 @@ fun HoldingItemCard(
                             fontWeight = FontWeight.SemiBold,
                             color = pnlColor,
                         ),
+                        maxLines = 1,
                     )
                 }
             }
@@ -368,13 +377,17 @@ fun HoldingItemCard(
             ) {
                 Text(
                     text = "Reference: ${Formatters.formatInr(stock.referenceValue)}",
-                    style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                    style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteTextSecondary),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
                 )
                 val perShare = if (stock.shares > 0.0) stock.currentValue / stock.shares else 0.0
                 if (perShare > 0.0) {
                     Text(
-                        text = "Avg Value/Sh: ${Formatters.formatInr(perShare)}",
-                        style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                        text = "Avg/Sh: ${Formatters.formatInr(perShare)}",
+                        style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteTextSecondary),
+                        maxLines = 1,
                     )
                 }
             }

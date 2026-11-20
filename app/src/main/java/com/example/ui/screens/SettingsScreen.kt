@@ -57,8 +57,8 @@ import com.example.ui.theme.GraphiteKpiDivider
 import com.example.ui.theme.GraphiteNavSurface
 import com.example.ui.theme.GraphiteOnAccent
 import com.example.ui.theme.GraphiteRed
-import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.theme.MonoCodeTextStyle
 import com.example.ui.viewmodel.PortfolioUiState
 
@@ -88,7 +88,7 @@ fun SettingsScreen(
             text = {
                 Text(
                     text = "This permanently deletes all stored portfolio snapshots from the backend (DELETE /api/portfolio). This action cannot be undone.",
-                    color = GraphiteTextMuted,
+                    color = GraphiteTextSecondary,
                     fontSize = 13.sp,
                 )
             },
@@ -98,6 +98,7 @@ fun SettingsScreen(
                         showResetDialog = false
                         onResetAllSnapshots()
                     },
+                    shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = GraphiteRed,
                         contentColor = GraphiteOnAccent,
@@ -109,7 +110,7 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) {
-                    Text("Cancel", color = GraphiteTextMuted)
+                    Text("Cancel", color = GraphiteTextSecondary)
                 }
             },
         )
@@ -117,7 +118,7 @@ fun SettingsScreen(
 
     val status = uiState.serverStatus
     val (statusLabel, statusColor) = when (status.reachability) {
-        ServerReachability.UNKNOWN -> "Unknown" to GraphiteTextMuted
+        ServerReachability.UNKNOWN -> "Unknown" to GraphiteTextSecondary
         ServerReachability.CHECKING -> "Checking..." to GraphiteAmber
         ServerReachability.UP -> "Up" to GraphiteGreen
         ServerReachability.DOWN -> "Down" to GraphiteRed
@@ -164,7 +165,7 @@ fun SettingsScreen(
                 Surface(
                     shape = RoundedCornerShape(10.dp),
                     color = GraphiteNavSurface,
-                    border = BorderStroke(1.dp, GraphiteKpiDivider),
+                    border = BorderStroke(1.dp, GraphiteBorder),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Column(
@@ -191,8 +192,8 @@ fun SettingsScreen(
                         if (status.lastCheckedAt != null) {
                             Text(
                                 text = "Last checked: ${status.lastCheckedAt}",
-                                color = GraphiteTextMuted,
-                                fontSize = 11.sp,
+                                color = GraphiteTextSecondary,
+                                fontSize = 12.sp,
                             )
                         }
                         if (!status.detail.isNullOrBlank()) {
@@ -208,6 +209,7 @@ fun SettingsScreen(
                 OutlinedButton(
                     onClick = onCheckServerStatus,
                     enabled = status.reachability != ServerReachability.CHECKING,
+                    shape = RoundedCornerShape(10.dp),
                     border = BorderStroke(1.dp, GraphiteBorder),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -254,12 +256,13 @@ fun SettingsScreen(
             ) {
                 Text(
                     text = "Currently tracking ${uiState.snapshots.size} snapshot${if (uiState.snapshots.size == 1) "" else "s"} on the portfolio backend.",
-                    color = GraphiteTextMuted,
+                    color = GraphiteTextSecondary,
                     fontSize = 13.sp,
                 )
                 Button(
                     onClick = { showResetDialog = true },
                     enabled = !uiState.isResetting,
+                    shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = GraphiteRed,
                         contentColor = GraphiteOnAccent,
@@ -337,7 +340,7 @@ fun ThemeModeSelectorRow(
                         Icon(
                             imageVector = icon,
                             contentDescription = label,
-                            tint = if (selected) GraphiteOnAccent else GraphiteTextMuted,
+                            tint = if (selected) GraphiteOnAccent else GraphiteTextSecondary,
                             modifier = Modifier.size(15.dp),
                         )
                         Spacer(modifier = Modifier.width(4.dp))
@@ -345,7 +348,7 @@ fun ThemeModeSelectorRow(
                             text = label,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (selected) GraphiteOnAccent else GraphiteTextMuted,
+                            color = if (selected) GraphiteOnAccent else GraphiteTextSecondary,
                             maxLines = 1,
                             softWrap = false,
                         )
@@ -358,8 +361,8 @@ fun ThemeModeSelectorRow(
 
 @Composable
 private fun EndpointRow(label: String, url: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(text = label, color = GraphiteTextMuted, fontSize = 11.sp)
+    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        Text(text = label, color = GraphiteTextSecondary, fontSize = 12.sp, fontWeight = FontWeight.Medium)
         Text(
             text = url,
             style = MonoCodeTextStyle.copy(fontSize = 12.sp, color = GraphiteTextPrimary),

@@ -67,7 +67,6 @@ import com.example.ui.components.StatusBadge
 import com.example.ui.components.StockLineChart
 import com.example.ui.theme.GraphiteAccentViolet
 import com.example.ui.theme.GraphiteAmber
-import com.example.ui.theme.GraphiteBlue
 import com.example.ui.theme.GraphiteBorder
 import com.example.ui.theme.GraphiteGreen
 import com.example.ui.theme.GraphiteKpiCard
@@ -77,6 +76,7 @@ import com.example.ui.theme.GraphiteOnAccent
 import com.example.ui.theme.GraphiteRed
 import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.theme.MonoCodeTextStyle
 import com.example.ui.theme.TabularNumberTextStyle
 import com.example.ui.viewmodel.ScreenerUiState
@@ -99,7 +99,7 @@ fun LiveScreenerScreen(
     val (connLabel, connColor) = when (uiState.connectionStatus) {
         ScreenerConnectionStatus.CONNECTING -> "Connecting" to GraphiteAmber
         ScreenerConnectionStatus.CONNECTED -> "Connected" to GraphiteGreen
-        ScreenerConnectionStatus.DISCONNECTED -> "Disconnected" to GraphiteTextMuted
+        ScreenerConnectionStatus.DISCONNECTED -> "Disconnected" to GraphiteTextSecondary
         ScreenerConnectionStatus.ERROR -> "Error" to GraphiteRed
     }
 
@@ -124,11 +124,11 @@ fun LiveScreenerScreen(
                 OutlinedTextField(
                     value = uiState.companyInput,
                     onValueChange = onCompanyInputChange,
-                    label = { Text("Company Code (e.g. TATAGOLD)", color = GraphiteTextMuted) },
+                    label = { Text("Company Code (e.g. TATAGOLD)", color = GraphiteTextSecondary) },
                     placeholder = { Text("RELIANCE", color = GraphiteTextMuted) },
                     isError = uiState.inputError != null,
                     supportingText = uiState.inputError?.let { err ->
-                        { Text(err, color = GraphiteRed, fontSize = 11.sp) }
+                        { Text(err, color = GraphiteRed, fontSize = 12.sp) }
                     },
                     singleLine = true,
                     textStyle = MonoCodeTextStyle.copy(
@@ -182,7 +182,7 @@ fun LiveScreenerScreen(
                                 selectedContainerColor = GraphiteAccentViolet,
                                 selectedLabelColor = GraphiteOnAccent,
                                 containerColor = GraphiteNavSurface,
-                                labelColor = GraphiteTextMuted,
+                                labelColor = GraphiteTextSecondary,
                             ),
                             border = FilterChipDefaults.filterChipBorder(
                                 enabled = true,
@@ -195,17 +195,18 @@ fun LiveScreenerScreen(
                     }
                 }
 
-                // Polling Interval Selector
-                Row(
+                // Polling Interval Selector (wraps cleanly on narrow screens)
+                FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
                         text = "Polling Interval",
-                        color = GraphiteTextMuted,
-                        fontSize = 12.sp,
+                        color = GraphiteTextSecondary,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
+                        modifier = Modifier.align(Alignment.CenterVertically),
                     )
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         ScreenerUiState.INTERVALS.forEach { sec ->
@@ -216,20 +217,23 @@ fun LiveScreenerScreen(
                                 label = {
                                     Text(
                                         text = "${sec}s",
-                                        style = TabularNumberTextStyle.copy(fontSize = 12.sp),
+                                        style = TabularNumberTextStyle.copy(
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                        ),
                                     )
                                 },
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = GraphiteBlue.copy(alpha = 0.25f),
-                                    selectedLabelColor = GraphiteBlue,
+                                    selectedContainerColor = GraphiteAccentViolet.copy(alpha = 0.18f),
+                                    selectedLabelColor = GraphiteAccentViolet,
                                     containerColor = GraphiteNavSurface,
-                                    labelColor = GraphiteTextMuted,
+                                    labelColor = GraphiteTextSecondary,
                                 ),
                                 border = FilterChipDefaults.filterChipBorder(
                                     enabled = true,
                                     selected = selected,
                                     borderColor = GraphiteBorder,
-                                    selectedBorderColor = GraphiteBlue,
+                                    selectedBorderColor = GraphiteAccentViolet,
                                 ),
                                 modifier = Modifier.testTag("interval_${sec}s"),
                             )
@@ -248,6 +252,7 @@ fun LiveScreenerScreen(
                             onFetchSnapshot()
                         },
                         enabled = !uiState.isFetchingSnapshot,
+                        shape = RoundedCornerShape(10.dp),
                         border = BorderStroke(1.dp, GraphiteBorder),
                         modifier = Modifier
                             .weight(1f)
@@ -269,12 +274,13 @@ fun LiveScreenerScreen(
                             )
                         }
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Fetch Snapshot", color = GraphiteTextPrimary, maxLines = 1)
+                        Text("Fetch Snapshot", color = GraphiteTextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
 
                     if (uiState.isStreaming) {
                         Button(
                             onClick = onStopStreaming,
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = GraphiteRed,
                                 contentColor = GraphiteOnAccent,
@@ -298,6 +304,7 @@ fun LiveScreenerScreen(
                                 keyboardController?.hide()
                                 onStartStreaming()
                             },
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = GraphiteAccentViolet,
                                 contentColor = GraphiteOnAccent,
@@ -338,13 +345,13 @@ fun LiveScreenerScreen(
                 Surface(
                     shape = RoundedCornerShape(14.dp),
                     color = GraphiteKpiCard,
-                    border = BorderStroke(1.dp, GraphiteKpiDivider),
+                    border = BorderStroke(1.dp, GraphiteBorder),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(14.dp),
+                            .padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -361,13 +368,13 @@ fun LiveScreenerScreen(
                             )
                             Text(
                                 text = "Last Updated: ${Formatters.formatIstTimestamp(snap.time)}",
-                                style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                                style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteTextSecondary),
                             )
                         }
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = GraphiteAccentViolet.copy(alpha = 0.16f),
-                            border = BorderStroke(1.dp, GraphiteAccentViolet.copy(alpha = 0.4f)),
+                            color = GraphiteAccentViolet.copy(alpha = 0.14f),
+                            border = BorderStroke(1.dp, GraphiteAccentViolet.copy(alpha = 0.35f)),
                         ) {
                             Text(
                                 text = snap.companyCode,
@@ -404,7 +411,7 @@ fun LiveScreenerScreen(
                             value = snap.marketCap?.let { "₹${Formatters.formatIndianNumber(it, 0)} Cr" } ?: "—",
                             supportingText = "Market capitalization",
                             icon = Icons.Outlined.AccountBalance,
-                            iconTint = GraphiteBlue,
+                            iconTint = GraphiteTextSecondary,
                             modifier = mod,
                         )
                     },
@@ -444,7 +451,7 @@ fun LiveScreenerScreen(
                             value = Formatters.formatIstShortTime(snap.time),
                             supportingText = Formatters.formatIstTimestamp(snap.time),
                             icon = Icons.Outlined.Schedule,
-                            iconTint = GraphiteBlue,
+                            iconTint = GraphiteTextSecondary,
                             modifier = mod,
                         )
                     },
@@ -518,7 +525,7 @@ fun LiveScreenerScreen(
                 if (uiState.streamedRecords.isEmpty()) {
                     Text(
                         text = "No streamed ticks recorded yet. Tap Start Stream to receive live updates every ${uiState.pollingIntervalSeconds}s.",
-                        color = GraphiteTextMuted,
+                        color = GraphiteTextSecondary,
                         fontSize = 13.sp,
                     )
                 }
@@ -550,9 +557,11 @@ private fun DynamicRatioRow(
     ) {
         Text(
             text = name,
-            color = GraphiteTextMuted,
+            color = GraphiteTextSecondary,
             fontSize = 13.sp,
             modifier = Modifier.weight(1f).padding(end = 12.dp),
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
         )
         when (ratioValue) {
             is RatioValue.NullVal -> {
@@ -610,17 +619,17 @@ private fun StreamedRecordRow(record: ScreenerRecord) {
     val highlight = record.changed
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = if (highlight) GraphiteGreen.copy(alpha = 0.12f) else GraphiteKpiCard,
+        color = if (highlight) GraphiteGreen.copy(alpha = 0.10f) else GraphiteKpiCard,
         border = BorderStroke(
             1.dp,
-            if (highlight) GraphiteGreen.copy(alpha = 0.45f) else GraphiteKpiDivider,
+            if (highlight) GraphiteGreen.copy(alpha = 0.35f) else GraphiteBorder,
         ),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -636,9 +645,9 @@ private fun StreamedRecordRow(record: ScreenerRecord) {
                 Text(
                     text = if (highlight) "CHANGED TICK" else "UNCHANGED",
                     style = MonoCodeTextStyle.copy(
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = if (highlight) GraphiteGreen else GraphiteTextMuted,
+                        color = if (highlight) GraphiteGreen else GraphiteTextSecondary,
                     ),
                 )
             }

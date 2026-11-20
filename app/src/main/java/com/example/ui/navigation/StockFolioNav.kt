@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -65,6 +64,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -73,7 +73,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -105,8 +104,8 @@ import com.example.ui.theme.GraphiteCanvas
 import com.example.ui.theme.GraphiteKpiDivider
 import com.example.ui.theme.GraphiteNavSurface
 import com.example.ui.theme.GraphiteOnAccent
-import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.viewmodel.PortfolioViewModel
 import com.example.ui.viewmodel.ScreenerViewModel
 import com.example.ui.viewmodel.SignalsViewModel
@@ -257,12 +256,12 @@ fun StockFolioApp(
             .background(GraphiteCanvas),
     ) {
         val isExpanded = maxWidth >= 840.dp
-        val isDesktop = maxWidth >= 1100.dp
+        val isDesktop = maxWidth >= 1140.dp
         val isMedium = maxWidth >= 600.dp && maxWidth < 840.dp
         val isUltraCompact = maxWidth < 360.dp
         val kpiColumns = when {
             isDesktop -> 5
-            isExpanded -> 4
+            isExpanded -> 3
             isMedium -> 3
             isUltraCompact -> 1
             else -> 2
@@ -334,7 +333,7 @@ fun StockFolioApp(
                                     Icon(
                                         imageVector = themeIcon,
                                         contentDescription = "Theme: ${themeMode.label}. Tap to switch.",
-                                        tint = GraphiteTextMuted,
+                                        tint = GraphiteTextSecondary,
                                     )
                                 }
 
@@ -384,100 +383,100 @@ fun StockFolioApp(
                             navController = navController,
                             startDestination = Routes.DASHBOARD,
                         ) {
-                        composable(Routes.DASHBOARD) {
-                            DashboardScreen(
-                                uiState = portfolioState,
-                                kpiColumns = kpiColumns,
-                                onRetry = { portfolioViewModel.loadAllSnapshots(isManualRefresh = false) },
-                                onNavigateToUpload = { navigateToTopLevel(Routes.UPLOAD) },
-                                onNavigateToHoldings = { navigateToTopLevel(Routes.HOLDINGS) },
-                                onNavigateToSnapshot = { date ->
-                                    navController.navigate(Routes.historyDetail(date))
-                                },
-                            )
+                            composable(Routes.DASHBOARD) {
+                                DashboardScreen(
+                                    uiState = portfolioState,
+                                    kpiColumns = kpiColumns,
+                                    onRetry = { portfolioViewModel.loadAllSnapshots(isManualRefresh = false) },
+                                    onNavigateToUpload = { navigateToTopLevel(Routes.UPLOAD) },
+                                    onNavigateToHoldings = { navigateToTopLevel(Routes.HOLDINGS) },
+                                    onNavigateToSnapshot = { date ->
+                                        navController.navigate(Routes.historyDetail(date))
+                                    },
+                                )
+                            }
+                            composable(Routes.UPLOAD) {
+                                UploadPortfolioScreen(
+                                    uploadState = portfolioState.uploadState,
+                                    kpiColumns = kpiColumns,
+                                    onSelectImage = portfolioViewModel::selectUploadImage,
+                                    onUpload = portfolioViewModel::uploadSelectedImage,
+                                    onClear = portfolioViewModel::clearUpload,
+                                    onNavigateToDashboard = { navigateToTopLevel(Routes.DASHBOARD) },
+                                )
+                            }
+                            composable(Routes.HOLDINGS) {
+                                PortfolioHoldingsScreen(
+                                    uiState = portfolioState,
+                                    kpiColumns = kpiColumns,
+                                    onRetry = { portfolioViewModel.loadAllSnapshots(isManualRefresh = false) },
+                                    onNavigateToUpload = { navigateToTopLevel(Routes.UPLOAD) },
+                                )
+                            }
+                            composable(Routes.HISTORY) {
+                                PortfolioHistoryScreen(
+                                    uiState = portfolioState,
+                                    onRetry = { portfolioViewModel.loadAllSnapshots(isManualRefresh = false) },
+                                    onNavigateToUpload = { navigateToTopLevel(Routes.UPLOAD) },
+                                    onSelectSnapshot = { date ->
+                                        navController.navigate(Routes.historyDetail(date))
+                                    },
+                                )
+                            }
+                            composable(
+                                route = Routes.HISTORY_DETAIL,
+                                arguments = listOf(navArgument("date") { type = NavType.StringType }),
+                            ) { entry ->
+                                val dateArg = entry.arguments?.getString("date").orEmpty()
+                                SnapshotDetailScreen(
+                                    date = dateArg,
+                                    detailState = portfolioState.detailState,
+                                    kpiColumns = kpiColumns,
+                                    onLoadSnapshot = portfolioViewModel::loadSnapshotByDate,
+                                    onBack = { navController.popBackStack() },
+                                )
+                            }
+                            composable(Routes.ANALYTICS) {
+                                AnalyticsScreen(
+                                    uiState = portfolioState,
+                                    kpiColumns = kpiColumns,
+                                    onRetry = { portfolioViewModel.loadAllSnapshots(isManualRefresh = false) },
+                                    onNavigateToUpload = { navigateToTopLevel(Routes.UPLOAD) },
+                                )
+                            }
+                            composable(Routes.PORTFOLIO_SIGNALS) {
+                                PortfolioSignalsScreen(
+                                    uiState = signalsState,
+                                    kpiColumns = kpiColumns,
+                                    onExecuteSignals = signalsViewModel::executeSignals,
+                                    onSelectHistoryEntry = signalsViewModel::selectHistoryEntry,
+                                    onShowMessage = { msg ->
+                                        scope.launch { snackbarHostState.showSnackbar(msg) }
+                                    },
+                                )
+                            }
+                            composable(Routes.SCREENER) {
+                                LiveScreenerScreen(
+                                    uiState = screenerState,
+                                    kpiColumns = kpiColumns,
+                                    onCompanyInputChange = screenerViewModel::onCompanyInputChanged,
+                                    onSelectPreset = screenerViewModel::selectPreset,
+                                    onSelectInterval = screenerViewModel::setPollingInterval,
+                                    onFetchSnapshot = screenerViewModel::fetchSnapshot,
+                                    onStartStreaming = screenerViewModel::startStreaming,
+                                    onStopStreaming = screenerViewModel::stopStreaming,
+                                )
+                            }
+                            composable(Routes.SETTINGS) {
+                                SettingsScreen(
+                                    uiState = portfolioState,
+                                    themeMode = themeMode,
+                                    onSelectThemeMode = onSelectThemeMode,
+                                    onCheckServerStatus = portfolioViewModel::checkServerStatus,
+                                    onResetAllSnapshots = portfolioViewModel::resetAllSnapshots,
+                                )
+                            }
                         }
-                        composable(Routes.UPLOAD) {
-                            UploadPortfolioScreen(
-                                uploadState = portfolioState.uploadState,
-                                kpiColumns = kpiColumns,
-                                onSelectImage = portfolioViewModel::selectUploadImage,
-                                onUpload = portfolioViewModel::uploadSelectedImage,
-                                onClear = portfolioViewModel::clearUpload,
-                                onNavigateToDashboard = { navigateToTopLevel(Routes.DASHBOARD) },
-                            )
-                        }
-                        composable(Routes.HOLDINGS) {
-                            PortfolioHoldingsScreen(
-                                uiState = portfolioState,
-                                kpiColumns = kpiColumns,
-                                onRetry = { portfolioViewModel.loadAllSnapshots(isManualRefresh = false) },
-                                onNavigateToUpload = { navigateToTopLevel(Routes.UPLOAD) },
-                            )
-                        }
-                        composable(Routes.HISTORY) {
-                            PortfolioHistoryScreen(
-                                uiState = portfolioState,
-                                onRetry = { portfolioViewModel.loadAllSnapshots(isManualRefresh = false) },
-                                onNavigateToUpload = { navigateToTopLevel(Routes.UPLOAD) },
-                                onSelectSnapshot = { date ->
-                                    navController.navigate(Routes.historyDetail(date))
-                                },
-                            )
-                        }
-                        composable(
-                            route = Routes.HISTORY_DETAIL,
-                            arguments = listOf(navArgument("date") { type = NavType.StringType }),
-                        ) { entry ->
-                            val dateArg = entry.arguments?.getString("date").orEmpty()
-                            SnapshotDetailScreen(
-                                date = dateArg,
-                                detailState = portfolioState.detailState,
-                                kpiColumns = kpiColumns,
-                                onLoadSnapshot = portfolioViewModel::loadSnapshotByDate,
-                                onBack = { navController.popBackStack() },
-                            )
-                        }
-                        composable(Routes.ANALYTICS) {
-                            AnalyticsScreen(
-                                uiState = portfolioState,
-                                kpiColumns = kpiColumns,
-                                onRetry = { portfolioViewModel.loadAllSnapshots(isManualRefresh = false) },
-                                onNavigateToUpload = { navigateToTopLevel(Routes.UPLOAD) },
-                            )
-                        }
-                        composable(Routes.PORTFOLIO_SIGNALS) {
-                            PortfolioSignalsScreen(
-                                uiState = signalsState,
-                                kpiColumns = kpiColumns,
-                                onExecuteSignals = signalsViewModel::executeSignals,
-                                onSelectHistoryEntry = signalsViewModel::selectHistoryEntry,
-                                onShowMessage = { msg ->
-                                    scope.launch { snackbarHostState.showSnackbar(msg) }
-                                },
-                            )
-                        }
-                        composable(Routes.SCREENER) {
-                            LiveScreenerScreen(
-                                uiState = screenerState,
-                                kpiColumns = kpiColumns,
-                                onCompanyInputChange = screenerViewModel::onCompanyInputChanged,
-                                onSelectPreset = screenerViewModel::selectPreset,
-                                onSelectInterval = screenerViewModel::setPollingInterval,
-                                onFetchSnapshot = screenerViewModel::fetchSnapshot,
-                                onStartStreaming = screenerViewModel::startStreaming,
-                                onStopStreaming = screenerViewModel::stopStreaming,
-                            )
-                        }
-                        composable(Routes.SETTINGS) {
-                            SettingsScreen(
-                                uiState = portfolioState,
-                                themeMode = themeMode,
-                                onSelectThemeMode = onSelectThemeMode,
-                                onCheckServerStatus = portfolioViewModel::checkServerStatus,
-                                onResetAllSnapshots = portfolioViewModel::resetAllSnapshots,
-                            )
-                        }
-                    }
                     }
                 }
             }
@@ -497,12 +496,20 @@ fun StockFolioApp(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(vertical = 12.dp),
                         ) {
-                            Text(
-                                text = "SF",
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
                                 color = GraphiteAccentViolet,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                            )
+                                modifier = Modifier.size(36.dp),
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = "SF",
+                                        color = GraphiteOnAccent,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp,
+                                    )
+                                }
+                            }
                         }
                     },
                 ) {
@@ -525,7 +532,7 @@ fun StockFolioApp(
                                 label = {
                                     Text(
                                         text = dest.shortLabel,
-                                        fontSize = 10.sp,
+                                        fontSize = 11.sp,
                                         maxLines = 1,
                                     )
                                 },
@@ -533,14 +540,15 @@ fun StockFolioApp(
                                     selectedIconColor = GraphiteOnAccent,
                                     selectedTextColor = GraphiteAccentViolet,
                                     indicatorColor = GraphiteAccentViolet,
-                                    unselectedIconColor = GraphiteTextMuted,
-                                    unselectedTextColor = GraphiteTextMuted,
+                                    unselectedIconColor = GraphiteTextSecondary,
+                                    unselectedTextColor = GraphiteTextSecondary,
                                 ),
                                 modifier = Modifier.testTag("nav_${dest.route}"),
                             )
                         }
                     }
                 }
+                VerticalDivider(thickness = 1.dp, color = GraphiteKpiDivider)
                 Box(modifier = Modifier.weight(1f)) {
                     appScaffold()
                 }
@@ -589,9 +597,9 @@ fun StockFolioApp(
                                         color = GraphiteTextPrimary,
                                     )
                                     Text(
-                                        text = "Graphite Portfolio Suite",
-                                        color = GraphiteTextMuted,
-                                        fontSize = 11.sp,
+                                        text = "Midnight Finance",
+                                        color = GraphiteTextSecondary,
+                                        fontSize = 12.sp,
                                     )
                                 }
                             }
@@ -627,7 +635,7 @@ fun StockFolioApp(
                                         selectedIconColor = GraphiteOnAccent,
                                         selectedTextColor = GraphiteOnAccent,
                                         unselectedContainerColor = Color.Transparent,
-                                        unselectedIconColor = GraphiteTextMuted,
+                                        unselectedIconColor = GraphiteTextSecondary,
                                         unselectedTextColor = GraphiteTextPrimary,
                                     ),
                                     shape = RoundedCornerShape(12.dp),
@@ -642,7 +650,7 @@ fun StockFolioApp(
                             )
                             Text(
                                 text = "Theme",
-                                color = GraphiteTextMuted,
+                                color = GraphiteTextSecondary,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),

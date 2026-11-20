@@ -19,6 +19,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,18 +35,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.GraphiteAccentViolet
+import com.example.ui.theme.GraphiteBorder
 import com.example.ui.theme.GraphiteKpiCard
 import com.example.ui.theme.GraphiteKpiDivider
-import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.theme.TabularNumberTextStyle
 
 /**
- * Standardized 3-section Fintech KPI Card:
- * - Consistent 14.dp border radius, #101514 surface, 1.dp #202927 border, subtle 1.dp elevation
- * - 1. Top: 13.sp readable muted label on left + 36.dp aligned semantic icon badge on right
- * - 2. Middle: Prominent 22.sp bold tabular numeral value
- * - 3. Bottom: 1.dp #202927 divider + 12.sp high-contrast supporting text
+ * Standardized 3-section Midnight Finance KPI Card:
+ * - #101820 surface, 1.dp #202B36 border, 14.dp corner radius, zero glow/shadow
+ * - 1. Top: 13.sp readable secondary label (#A1AAB5) + 36.dp soft semantic icon container
+ * - 2. Middle: Prominent bold tabular value with automatic step-down sizing to prevent clipping
+ * - 3. Bottom: 1.dp #202B36 divider + 12.sp high-contrast secondary description (#A1AAB5)
  */
 @Composable
 fun KpiCard(
@@ -62,6 +67,8 @@ fun KpiCard(
         .fillMaxHeight()
         .let { if (testTag != null) it.testTag(testTag) else it }
 
+    var valueFontSizeSp by remember(value) { mutableFloatStateOf(22f) }
+
     val content: @Composable () -> Unit = {
         Column(
             modifier = Modifier
@@ -71,7 +78,7 @@ fun KpiCard(
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Top Section
+                // Top Section: Label + Soft Icon Badge
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -79,7 +86,7 @@ fun KpiCard(
                 ) {
                     Text(
                         text = title,
-                        color = GraphiteTextMuted,
+                        color = GraphiteTextSecondary,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Medium,
                         maxLines = 1,
@@ -90,9 +97,9 @@ fun KpiCard(
                     )
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(iconTint.copy(alpha = 0.14f)),
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(9.dp))
+                            .background(iconTint.copy(alpha = 0.12f)),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
@@ -104,21 +111,28 @@ fun KpiCard(
                     }
                 }
 
-                // Middle Section
+                // Middle Section: Prominent Tabular Financial Value
                 Text(
                     text = value,
                     style = valueStyle.copy(
-                        fontSize = 22.sp,
-                        lineHeight = 28.sp,
+                        fontSize = valueFontSizeSp.sp,
+                        lineHeight = (valueFontSizeSp + 6f).sp,
+                        letterSpacing = (-0.3).sp,
                         fontWeight = FontWeight.Bold,
                         color = valueColor,
                     ),
                     maxLines = 1,
+                    softWrap = false,
                     overflow = TextOverflow.Ellipsis,
+                    onTextLayout = { result ->
+                        if (result.didOverflowWidth && valueFontSizeSp > 15f) {
+                            valueFontSizeSp = (valueFontSizeSp - 1.5f).coerceAtLeast(15f)
+                        }
+                    },
                 )
             }
 
-            // Bottom Section
+            // Bottom Section: Divider + Supporting Context
             Column(
                 modifier = Modifier.padding(top = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -129,7 +143,7 @@ fun KpiCard(
                 )
                 Text(
                     text = supportingText,
-                    color = GraphiteTextMuted,
+                    color = GraphiteTextSecondary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
                     maxLines = 1,
@@ -145,8 +159,7 @@ fun KpiCard(
             modifier = cardModifier,
             shape = RoundedCornerShape(14.dp),
             color = GraphiteKpiCard,
-            border = BorderStroke(1.dp, GraphiteKpiDivider),
-            shadowElevation = 1.dp,
+            border = BorderStroke(1.dp, GraphiteBorder),
         ) {
             content()
         }
@@ -155,8 +168,7 @@ fun KpiCard(
             modifier = cardModifier,
             shape = RoundedCornerShape(14.dp),
             color = GraphiteKpiCard,
-            border = BorderStroke(1.dp, GraphiteKpiDivider),
-            shadowElevation = 1.dp,
+            border = BorderStroke(1.dp, GraphiteBorder),
         ) {
             content()
         }

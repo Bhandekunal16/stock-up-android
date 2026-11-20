@@ -22,9 +22,9 @@ import com.example.ui.components.KpiCard
 import com.example.ui.components.LoadingStateBox
 import com.example.ui.components.ResponsiveKpiGrid
 import com.example.ui.theme.GraphiteAccentViolet
-import com.example.ui.theme.GraphiteBlue
 import com.example.ui.theme.GraphiteGreen
 import com.example.ui.theme.GraphiteRed
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.viewmodel.SnapshotDetailState
 import com.example.util.Formatters
 
@@ -85,7 +85,7 @@ fun SnapshotDetailScreen(
                             value = Formatters.formatInr(snapshot.totalReferenceValue),
                             supportingText = "Invested capital baseline",
                             icon = Icons.Outlined.Savings,
-                            iconTint = GraphiteBlue,
+                            iconTint = GraphiteTextSecondary,
                             modifier = mod,
                         )
                     },

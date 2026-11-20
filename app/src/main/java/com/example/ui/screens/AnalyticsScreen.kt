@@ -41,13 +41,13 @@ import com.example.ui.components.StatusBadge
 import com.example.ui.components.StockLineChart
 import com.example.ui.theme.ChartPalette
 import com.example.ui.theme.GraphiteAccentViolet
-import com.example.ui.theme.GraphiteBlue
+import com.example.ui.theme.GraphiteBorder
 import com.example.ui.theme.GraphiteGreen
 import com.example.ui.theme.GraphiteKpiDivider
 import com.example.ui.theme.GraphiteNavSurface
 import com.example.ui.theme.GraphiteRed
-import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.theme.TabularNumberTextStyle
 import com.example.ui.viewmodel.PortfolioLoadState
 import com.example.ui.viewmodel.PortfolioUiState
@@ -170,8 +170,8 @@ private fun AnalyticsContent(
             val dateLabels = remember(snapshots) {
                 snapshots.map { Formatters.formatShortAxisDate(it.date) }
             }
-            val currentValColor = GraphiteAccentViolet
-            val refValColor = GraphiteBlue
+            val currentValColor = GraphiteGreen
+            val refValColor = GraphiteAccentViolet.copy(alpha = 0.78f)
             val growthSeries = remember(snapshots, currentValColor, refValColor) {
                 listOf(
                     LineSeries(
@@ -208,8 +208,8 @@ private fun AnalyticsContent(
             val stockLabels = remember(rankedStocks) {
                 rankedStocks.map { it.company.take(8) }
             }
-            val currentValColor = GraphiteAccentViolet
-            val refValColor = GraphiteBlue
+            val currentValColor = GraphiteGreen
+            val refValColor = GraphiteAccentViolet.copy(alpha = 0.78f)
             val comparisonSeries = remember(rankedStocks, currentValColor, refValColor) {
                 listOf(
                     LineSeries(
@@ -311,14 +311,14 @@ private fun AnalyticsRankingsCard(
     val badgeColor = if (isPositive) GraphiteGreen else GraphiteRed
     GraphiteSectionCard(title = title, subtitle = subtitle) {
         if (stocks.isEmpty()) {
-            Text(text = emptyText, color = GraphiteTextMuted, fontSize = 13.sp)
+            Text(text = emptyText, color = GraphiteTextSecondary, fontSize = 13.sp)
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 stocks.forEachIndexed { idx, stock ->
                     Surface(
                         shape = RoundedCornerShape(10.dp),
                         color = GraphiteNavSurface,
-                        border = BorderStroke(1.dp, GraphiteKpiDivider),
+                        border = BorderStroke(1.dp, GraphiteBorder),
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Row(
@@ -330,7 +330,7 @@ private fun AnalyticsRankingsCard(
                         ) {
                             Column(
                                 modifier = Modifier.weight(1f).padding(end = 10.dp),
-                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                                verticalArrangement = Arrangement.spacedBy(3.dp),
                             ) {
                                 Text(
                                     text = "${idx + 1}. ${stock.company}",
@@ -342,7 +342,7 @@ private fun AnalyticsRankingsCard(
                                 )
                                 Text(
                                     text = "Current: ${Formatters.formatInr(stock.currentValue)} • P&L: ${Formatters.formatSignedInr(stock.netDifference)}",
-                                    style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                                    style = TabularNumberTextStyle.copy(fontSize = 12.sp, color = GraphiteTextSecondary),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )

@@ -1,7 +1,6 @@
 package com.example.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,7 +34,6 @@ import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -45,7 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.AnnotatedString
@@ -64,11 +60,9 @@ import com.example.ui.theme.GraphiteAccentViolet
 import com.example.ui.theme.GraphiteAmber
 import com.example.ui.theme.GraphiteBorder
 import com.example.ui.theme.GraphiteGreen
-import com.example.ui.theme.GraphiteKpiDivider
 import com.example.ui.theme.GraphiteNavSurface
 import com.example.ui.theme.GraphiteOnAccent
 import com.example.ui.theme.GraphiteRed
-import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
 import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.theme.MonoCodeTextStyle
@@ -88,7 +82,7 @@ fun PortfolioSignalsScreen(
     val hasRunBefore = uiState.history.isNotEmpty() || uiState.status != SignalsExecutionStatus.NOT_RUN
 
     val (statusLabel, statusColor, statusIcon) = when (uiState.status) {
-        SignalsExecutionStatus.NOT_RUN -> Triple("Not Run", GraphiteTextMuted, Icons.Outlined.Terminal)
+        SignalsExecutionStatus.NOT_RUN -> Triple("Not Run", GraphiteTextSecondary, Icons.Outlined.Terminal)
         SignalsExecutionStatus.RUNNING -> Triple("Running", GraphiteAmber, Icons.Outlined.Bolt)
         SignalsExecutionStatus.SUCCESS -> Triple("Success", GraphiteGreen, Icons.Outlined.CheckCircle)
         SignalsExecutionStatus.FAILED -> Triple("Failed", GraphiteRed, Icons.Outlined.ErrorOutline)
@@ -111,7 +105,7 @@ fun PortfolioSignalsScreen(
             val exitStr = uiState.exitCode?.toString() ?: "—"
             val exitColor = when (uiState.exitCode) {
                 0 -> GraphiteGreen
-                null -> GraphiteTextMuted
+                null -> GraphiteTextSecondary
                 else -> GraphiteRed
             }
             KpiCard(
@@ -142,7 +136,7 @@ fun PortfolioSignalsScreen(
                 value = uiState.durationMs?.let { Formatters.formatDurationMs(it) } ?: "—",
                 supportingText = "End-to-end execution latency",
                 icon = Icons.Outlined.Timer,
-                iconTint = GraphiteAccentViolet,
+                iconTint = GraphiteTextSecondary,
                 modifier = mod,
             )
         },
@@ -162,6 +156,7 @@ fun PortfolioSignalsScreen(
                 Button(
                     onClick = onExecuteSignals,
                     enabled = !isRunning,
+                    shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = GraphiteAccentViolet,
                         contentColor = GraphiteOnAccent,
@@ -225,6 +220,7 @@ fun PortfolioSignalsScreen(
                                 clipboardManager.setText(AnnotatedString(uiState.output))
                                 onShowMessage("Terminal output copied to clipboard")
                             },
+                            shape = RoundedCornerShape(10.dp),
                             border = BorderStroke(1.dp, GraphiteBorder),
                             modifier = Modifier
                                 .heightIn(min = 48.dp)
@@ -271,7 +267,7 @@ fun PortfolioSignalsScreen(
                             style = MonoCodeTextStyle.copy(
                                 fontSize = 12.sp,
                                 lineHeight = 18.sp,
-                                color = if (uiState.output.isNotBlank()) GraphiteTextPrimary else GraphiteTextMuted,
+                                color = if (uiState.output.isNotBlank()) GraphiteTextPrimary else GraphiteTextSecondary,
                             ),
                             softWrap = false,
                             modifier = Modifier.testTag("signals_terminal_output"),
@@ -305,7 +301,7 @@ fun PortfolioSignalsScreen(
             item {
                 Text(
                     text = "No signal runs yet in this session. Tap Generate Signals to begin.",
-                    color = GraphiteTextMuted,
+                    color = GraphiteTextSecondary,
                     fontSize = 13.sp,
                 )
             }
@@ -316,7 +312,7 @@ fun PortfolioSignalsScreen(
                     SignalsExecutionStatus.SUCCESS -> GraphiteGreen
                     SignalsExecutionStatus.FAILED -> GraphiteRed
                     SignalsExecutionStatus.RUNNING -> GraphiteAmber
-                    SignalsExecutionStatus.NOT_RUN -> GraphiteTextMuted
+                    SignalsExecutionStatus.NOT_RUN -> GraphiteTextSecondary
                 }
 
                 Surface(
@@ -325,7 +321,7 @@ fun PortfolioSignalsScreen(
                     color = if (selected) GraphiteAccentViolet.copy(alpha = 0.12f) else GraphiteNavSurface,
                     border = BorderStroke(
                         1.dp,
-                        if (selected) GraphiteAccentViolet else GraphiteKpiDivider,
+                        if (selected) GraphiteAccentViolet else GraphiteBorder,
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -352,7 +348,7 @@ fun PortfolioSignalsScreen(
                             )
                             Text(
                                 text = "Exit: ${entry.exitCode ?: "—"} • Duration: ${entry.durationMs?.let { Formatters.formatDurationMs(it) } ?: "—"}",
-                                style = MonoCodeTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                                style = MonoCodeTextStyle.copy(fontSize = 12.sp, color = GraphiteTextSecondary),
                             )
                         }
                         StatusBadge(

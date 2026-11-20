@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ShowChart
@@ -48,9 +49,10 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.theme.GraphiteBorder
 import com.example.ui.theme.GraphiteCard
 import com.example.ui.theme.GraphiteGreen
-import com.example.ui.theme.GraphiteKpiDivider
+import com.example.ui.theme.GraphiteKpiCard
 import com.example.ui.theme.GraphiteTextMuted
 import com.example.ui.theme.GraphiteTextPrimary
+import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.theme.TabularNumberTextStyle
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -70,8 +72,8 @@ data class LineSeries(
 
 /**
  * Pure line-graph component built with Jetpack Compose Canvas.
- * Improved legend spacing, subtle grid lines, 11.sp tabular axis labels,
- * and responsive non-clipping X/Y axis layout.
+ * Smooth cubic Bezier path rendering, subtle grid lines, crisp axis labels,
+ * generous legend spacing, and responsive touch scrub tooltip.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -80,7 +82,7 @@ fun StockLineChart(
     series: List<LineSeries>,
     yAxisFormatter: (Double) -> String,
     modifier: Modifier = Modifier,
-    chartHeight: Dp = 230.dp,
+    chartHeight: Dp = 236.dp,
     showZeroReferenceLine: Boolean = false,
     emptyTitle: String = "No chart data available",
     emptySubtitle: String = "Data points will appear here once available.",
@@ -111,7 +113,7 @@ fun StockLineChart(
                 )
                 Text(
                     text = emptySubtitle,
-                    color = GraphiteTextMuted,
+                    color = GraphiteTextSecondary,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center,
                 )
@@ -137,10 +139,10 @@ fun StockLineChart(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        // Legend with clean spacing away from the plot
+        // Legend with clean visual separation above the chart
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(18.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             nonEmptySeries.forEach { s ->
@@ -148,15 +150,32 @@ fun StockLineChart(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(width = 16.dp, height = 3.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(s.color),
-                    )
+                    if (s.dashed) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+                            Box(
+                                modifier = Modifier
+                                    .size(width = 7.dp, height = 3.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(s.color),
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(width = 7.dp, height = 3.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(s.color),
+                            )
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(width = 16.dp, height = 3.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(s.color),
+                        )
+                    }
                     Text(
                         text = s.name,
-                        color = GraphiteTextMuted,
+                        color = GraphiteTextSecondary,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         maxLines = 1,
@@ -166,7 +185,7 @@ fun StockLineChart(
             }
         }
 
-        // Scrubbed Inspector Banner
+        // Scrubbed Inspector Tooltip Banner
         val activeIdx = selectedIndex?.coerceIn(0, xLabels.lastIndex)
         if (activeIdx != null) {
             Surface(
@@ -174,12 +193,11 @@ fun StockLineChart(
                 color = GraphiteCard,
                 border = BorderStroke(1.dp, GraphiteBorder),
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     Text(
                         text = xLabels[activeIdx],
@@ -188,20 +206,36 @@ fun StockLineChart(
                         fontWeight = FontWeight.SemiBold,
                     )
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        nonEmptySeries.take(3).forEach { s ->
+                        nonEmptySeries.take(4).forEach { s ->
                             val pt = s.points.getOrNull(activeIdx)
                             if (pt != null) {
-                                Text(
-                                    text = yAxisFormatter(pt.value),
-                                    style = TabularNumberTextStyle.copy(
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = if (pt.highlighted) GraphiteGreen else s.color,
-                                    ),
-                                )
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(CircleShape)
+                                            .background(if (pt.highlighted) GraphiteGreen else s.color),
+                                    )
+                                    Text(
+                                        text = "${s.name}:",
+                                        color = GraphiteTextSecondary,
+                                        fontSize = 11.sp,
+                                    )
+                                    Text(
+                                        text = yAxisFormatter(pt.value),
+                                        style = TabularNumberTextStyle.copy(
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = GraphiteTextPrimary,
+                                        ),
+                                    )
+                                }
                             }
                         }
                     }
@@ -221,11 +255,11 @@ fun StockLineChart(
                     .height(chartHeight),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Y-axis Labels (readable 11.sp tabular numerals)
+                // Y-axis Labels (11.sp tabular numerals, readable secondary color)
                 Column(
                     modifier = Modifier
                         .height(chartHeight)
-                        .widthIn(min = 52.dp)
+                        .widthIn(min = 56.dp)
                         .padding(end = 10.dp, top = 6.dp, bottom = 6.dp),
                     verticalArrangement = Arrangement.SpaceBetween,
                     horizontalAlignment = Alignment.End,
@@ -236,18 +270,18 @@ fun StockLineChart(
                             style = TabularNumberTextStyle.copy(
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium,
-                                color = GraphiteTextMuted,
+                                color = GraphiteTextSecondary,
                             ),
                             maxLines = 1,
                         )
                     }
                 }
 
-                // Canvas Plot Area
-                val gridColor = GraphiteKpiDivider
-                val borderColor = GraphiteBorder
+                // Canvas Plot Area (capture colors in @Composable scope)
+                val gridColor = GraphiteBorder
                 val mutedColor = GraphiteTextMuted
                 val greenColor = GraphiteGreen
+                val cardBgColor = GraphiteKpiCard
 
                 Box(
                     modifier = Modifier
@@ -302,11 +336,11 @@ fun StockLineChart(
                         }
 
                         // Subtle horizontal grid lines
-                        val gridDash = PathEffect.dashPathEffect(floatArrayOf(6f, 6f), 0f)
+                        val gridDash = PathEffect.dashPathEffect(floatArrayOf(5f, 6f), 0f)
                         listOf(0f, 0.5f, 1f).forEach { frac ->
                             val y = topPad + plotH * frac
                             drawLine(
-                                color = gridColor.copy(alpha = 0.75f),
+                                color = gridColor.copy(alpha = 0.65f),
                                 start = Offset(leftPad, y),
                                 end = Offset(leftPad + plotW, y),
                                 strokeWidth = 1.dp.toPx(),
@@ -318,7 +352,7 @@ fun StockLineChart(
                         if (showZeroReferenceLine && minY <= 0.0 && maxY >= 0.0) {
                             val zeroY = mapY(0.0)
                             drawLine(
-                                color = borderColor,
+                                color = mutedColor.copy(alpha = 0.55f),
                                 start = Offset(leftPad, zeroY),
                                 end = Offset(leftPad + plotW, zeroY),
                                 strokeWidth = 1.2.dp.toPx(),
@@ -329,7 +363,7 @@ fun StockLineChart(
                         if (activeIdx != null) {
                             val cx = mapX(activeIdx, pointCount)
                             drawLine(
-                                color = mutedColor.copy(alpha = 0.45f),
+                                color = mutedColor.copy(alpha = 0.5f),
                                 start = Offset(cx, topPad),
                                 end = Offset(cx, topPad + plotH),
                                 strokeWidth = 1.dp.toPx(),
@@ -337,7 +371,7 @@ fun StockLineChart(
                             )
                         }
 
-                        // Draw each line series
+                        // Draw each line series using smooth monotone-clamped cubic Bezier curves
                         nonEmptySeries.forEach { s ->
                             val pts = s.points
                             if (pts.size == 1) {
@@ -346,17 +380,27 @@ fun StockLineChart(
                                 val dotColor = if (pts[0].highlighted) greenColor else s.color
                                 drawCircle(color = dotColor, radius = 5.dp.toPx(), center = Offset(cx, cy))
                             } else if (pts.size > 1) {
-                                val path = Path()
-                                pts.forEachIndexed { idx, pt ->
-                                    val x = mapX(idx, pts.size)
-                                    val y = mapY(pt.value)
-                                    if (idx == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                                val offsets = pts.mapIndexed { idx, pt ->
+                                    Offset(mapX(idx, pts.size), mapY(pt.value))
+                                }
+                                val path = Path().apply {
+                                    moveTo(offsets[0].x, offsets[0].y)
+                                    for (i in 0 until offsets.lastIndex) {
+                                        val p0 = offsets[i]
+                                        val p1 = offsets[i + 1]
+                                        val cx = (p0.x + p1.x) / 2f
+                                        cubicTo(
+                                            cx, p0.y,
+                                            cx, p1.y,
+                                            p1.x, p1.y,
+                                        )
+                                    }
                                 }
                                 drawPath(
                                     path = path,
                                     color = s.color,
                                     style = Stroke(
-                                        width = 2.5.dp.toPx(),
+                                        width = if (s.dashed) 2.1.dp.toPx() else 2.5.dp.toPx(),
                                         cap = StrokeCap.Round,
                                         join = StrokeJoin.Round,
                                         pathEffect = if (s.dashed) {
@@ -365,25 +409,35 @@ fun StockLineChart(
                                     ),
                                 )
 
-                                pts.forEachIndexed { idx, pt ->
-                                    val x = mapX(idx, pts.size)
-                                    val y = mapY(pt.value)
+                                offsets.forEachIndexed { idx, offset ->
+                                    val pt = pts[idx]
                                     if (pt.highlighted) {
                                         drawCircle(
-                                            color = greenColor.copy(alpha = 0.25f),
-                                            radius = 7.dp.toPx(),
-                                            center = Offset(x, y),
+                                            color = cardBgColor,
+                                            radius = 5.5.dp.toPx(),
+                                            center = offset,
                                         )
                                         drawCircle(
                                             color = greenColor,
-                                            radius = 4.dp.toPx(),
-                                            center = Offset(x, y),
+                                            radius = 3.8.dp.toPx(),
+                                            center = offset,
                                         )
-                                    } else if (s.showDots || activeIdx == idx) {
+                                    } else if (activeIdx == idx) {
+                                        drawCircle(
+                                            color = cardBgColor,
+                                            radius = 5.5.dp.toPx(),
+                                            center = offset,
+                                        )
                                         drawCircle(
                                             color = s.color,
-                                            radius = if (activeIdx == idx) 4.5.dp.toPx() else 2.8.dp.toPx(),
-                                            center = Offset(x, y),
+                                            radius = 3.8.dp.toPx(),
+                                            center = offset,
+                                        )
+                                    } else if (s.showDots) {
+                                        drawCircle(
+                                            color = s.color,
+                                            radius = 2.6.dp.toPx(),
+                                            center = offset,
                                         )
                                     }
                                 }
@@ -397,30 +451,30 @@ fun StockLineChart(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 62.dp, end = 4.dp),
+                    .padding(start = 66.dp, end = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 if (xLabels.size == 1) {
                     Text(
                         text = xLabels.first(),
-                        style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                        style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextSecondary),
                     )
                 } else {
                     Text(
                         text = xLabels.first(),
-                        style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                        style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextSecondary),
                         maxLines = 1,
                     )
                     if (xLabels.size >= 3) {
                         Text(
                             text = xLabels[xLabels.size / 2],
-                            style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                            style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextSecondary),
                             maxLines = 1,
                         )
                     }
                     Text(
                         text = xLabels.last(),
-                        style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextMuted),
+                        style = TabularNumberTextStyle.copy(fontSize = 11.sp, color = GraphiteTextSecondary),
                         maxLines = 1,
                     )
                 }
