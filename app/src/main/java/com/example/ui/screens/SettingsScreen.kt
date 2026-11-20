@@ -60,12 +60,16 @@ import com.example.ui.theme.GraphiteRed
 import com.example.ui.theme.GraphiteTextPrimary
 import com.example.ui.theme.GraphiteTextSecondary
 import com.example.ui.theme.MonoCodeTextStyle
+import com.example.ui.viewmodel.AppLockController
+import com.example.ui.viewmodel.AppLockUiState
 import com.example.ui.viewmodel.PortfolioUiState
 
 @Composable
 fun SettingsScreen(
     uiState: PortfolioUiState,
     themeMode: ThemeMode,
+    appLockUiState: AppLockUiState,
+    appLockController: AppLockController,
     onSelectThemeMode: (ThemeMode) -> Unit,
     onCheckServerStatus: () -> Unit,
     onResetAllSnapshots: () -> Unit,
@@ -147,6 +151,14 @@ fun SettingsScreen(
                     onSelect = onSelectThemeMode,
                 )
             }
+        }
+
+        // 0b. App Lock & Security
+        item {
+            AppLockSettingsCard(
+                uiState = appLockUiState,
+                controller = appLockController,
+            )
         }
 
         // 1. Server Status Card

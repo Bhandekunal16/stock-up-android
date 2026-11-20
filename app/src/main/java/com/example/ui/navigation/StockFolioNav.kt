@@ -106,6 +106,7 @@ import com.example.ui.theme.GraphiteNavSurface
 import com.example.ui.theme.GraphiteOnAccent
 import com.example.ui.theme.GraphiteTextPrimary
 import com.example.ui.theme.GraphiteTextSecondary
+import com.example.ui.viewmodel.AppLockController
 import com.example.ui.viewmodel.PortfolioViewModel
 import com.example.ui.viewmodel.ScreenerViewModel
 import com.example.ui.viewmodel.SignalsViewModel
@@ -196,6 +197,7 @@ private val topDestinations = listOf(
 @Composable
 fun StockFolioApp(
     themeMode: ThemeMode,
+    appLockController: AppLockController,
     onSelectThemeMode: (ThemeMode) -> Unit,
     onCycleThemeMode: () -> Unit,
     portfolioViewModel: PortfolioViewModel = viewModel(),
@@ -211,6 +213,7 @@ fun StockFolioApp(
     val portfolioState by portfolioViewModel.uiState.collectAsStateWithLifecycle()
     val signalsState by signalsViewModel.uiState.collectAsStateWithLifecycle()
     val screenerState by screenerViewModel.uiState.collectAsStateWithLifecycle()
+    val appLockState by appLockController.uiState.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -223,6 +226,11 @@ fun StockFolioApp(
     }
     LaunchedEffect(Unit) {
         screenerViewModel.messages.collect { msg ->
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
+    LaunchedEffect(appLockController) {
+        appLockController.messages.collect { msg ->
             snackbarHostState.showSnackbar(msg)
         }
     }
@@ -471,6 +479,8 @@ fun StockFolioApp(
                                 SettingsScreen(
                                     uiState = portfolioState,
                                     themeMode = themeMode,
+                                    appLockUiState = appLockState,
+                                    appLockController = appLockController,
                                     onSelectThemeMode = onSelectThemeMode,
                                     onCheckServerStatus = portfolioViewModel::checkServerStatus,
                                     onResetAllSnapshots = portfolioViewModel::resetAllSnapshots,
