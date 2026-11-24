@@ -2,4 +2,5 @@
 <paths>
     <cache-path name="camera_captures" path="camera/" />
     <cache-path name="shared_images" path="images/" />
+    <cache-path name="portfolio_exports" path="exports/" />
 </paths>

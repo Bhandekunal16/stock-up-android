@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.outlined.CompareArrows
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.CloudUpload
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialog
@@ -35,6 +36,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -81,6 +83,7 @@ fun PortfolioHistoryScreen(
     onRetry: () -> Unit,
     onNavigateToUpload: () -> Unit,
     onSelectSnapshot: (String) -> Unit,
+    onExportCsv: () -> Unit,
 ) {
     when (val load = uiState.loadState) {
         is PortfolioLoadState.Loading -> LoadingStateBox("Loading snapshot history...")
@@ -99,6 +102,7 @@ fun PortfolioHistoryScreen(
                 HistoryContent(
                     snapshotsNewestFirst = snapshotsNewestFirst,
                     onSelectSnapshot = onSelectSnapshot,
+                    onExportCsv = onExportCsv,
                 )
             }
         }
@@ -109,6 +113,7 @@ fun PortfolioHistoryScreen(
 private fun HistoryContent(
     snapshotsNewestFirst: List<PortfolioSnapshot>,
     onSelectSnapshot: (String) -> Unit,
+    onExportCsv: () -> Unit,
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var showCompareDialog by rememberSaveable { mutableStateOf(false) }
@@ -140,7 +145,7 @@ private fun HistoryContent(
     ) {
         item {
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                val compactWidth = maxWidth < 380.dp && snapshotsNewestFirst.size >= 2
+                val compactWidth = maxWidth < 460.dp
                 if (compactWidth) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         HistorySearchField(
@@ -148,25 +153,50 @@ private fun HistoryContent(
                             onValueChange = { searchQuery = it },
                             modifier = Modifier.fillMaxWidth(),
                         )
-                        Button(
-                            onClick = { showCompareDialog = true },
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = GraphiteAccentViolet,
-                                contentColor = GraphiteOnAccent,
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 48.dp)
-                                .testTag("compare_snapshots_button"),
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.CompareArrows,
-                                contentDescription = "Compare snapshots",
-                                modifier = Modifier.size(18.dp),
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text("Compare Snapshots", fontWeight = FontWeight.SemiBold)
+                            if (snapshotsNewestFirst.size >= 2) {
+                                Button(
+                                    onClick = { showCompareDialog = true },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = GraphiteAccentViolet,
+                                        contentColor = GraphiteOnAccent,
+                                    ),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .heightIn(min = 48.dp)
+                                        .testTag("compare_snapshots_button"),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Outlined.CompareArrows,
+                                        contentDescription = "Compare snapshots",
+                                        modifier = Modifier.size(18.dp),
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Text("Compare", fontWeight = FontWeight.SemiBold, maxLines = 1)
+                                }
+                            }
+                            OutlinedButton(
+                                onClick = onExportCsv,
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, GraphiteBorder),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .heightIn(min = 48.dp)
+                                    .testTag("history_export_csv_button"),
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.FileDownload,
+                                    contentDescription = "Export CSV",
+                                    tint = GraphiteAccentViolet,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("Export CSV", color = GraphiteTextPrimary, fontWeight = FontWeight.SemiBold, maxLines = 1)
+                            }
                         }
                     }
                 } else {
@@ -201,6 +231,24 @@ private fun HistoryContent(
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text("Compare", fontWeight = FontWeight.SemiBold, maxLines = 1)
                             }
+                        }
+
+                        OutlinedButton(
+                            onClick = onExportCsv,
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, GraphiteBorder),
+                            modifier = Modifier
+                                .heightIn(min = 52.dp)
+                                .testTag("history_export_csv_button"),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.FileDownload,
+                                contentDescription = "Export CSV",
+                                tint = GraphiteAccentViolet,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Export CSV", color = GraphiteTextPrimary, fontWeight = FontWeight.SemiBold, maxLines = 1)
                         }
                     }
                 }

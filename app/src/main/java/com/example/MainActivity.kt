@@ -18,6 +18,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.security.BiometricOutcome
 import com.example.security.BiometricPromptHelper
+import com.example.ui.components.launchCsvShareIntent
 import com.example.ui.navigation.StockFolioApp
 import com.example.ui.screens.AppLockScreen
 import com.example.ui.theme.GraphiteAccentViolet
@@ -37,6 +42,11 @@ import com.example.ui.theme.StockFolioTheme
 import com.example.ui.theme.resolveIsDarkTheme
 import com.example.ui.viewmodel.AppLockViewModel
 import com.example.ui.viewmodel.ThemeViewModel
+import com.example.util.CsvExportPayload
+import com.example.util.PortfolioCsvExporter
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +62,60 @@ class MainActivity : FragmentActivity() {
             val appLockState by appLockViewModel.uiState.collectAsStateWithLifecycle()
             val isDark = resolveIsDarkTheme(themeMode)
             val lifecycleOwner = LocalLifecycleOwner.current
+            val coroutineScope = rememberCoroutineScope()
+
+            var pendingCsvPayload by remember { mutableStateOf<CsvExportPayload?>(null) }
+            val exportMessageChannel = remember { Channel<String>(Channel.BUFFERED) }
+            val exportMessages = remember(exportMessageChannel) { exportMessageChannel.receiveAsFlow() }
+
+            val createCsvLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.CreateDocument("text/csv"),
+            ) { destinationUri ->
+                val payload = pendingCsvPayload
+                pendingCsvPayload = null
+                if (destinationUri != null && payload != null) {
+                    coroutineScope.launch {
+                        PortfolioCsvExporter.writeCsvToUri(
+                            context = applicationContext,
+                            uri = destinationUri,
+                            csvContent = payload.content,
+                        ).onSuccess {
+                            exportMessageChannel.trySend(
+                                "Saved ${payload.fileName} (${payload.rowCount} rows)"
+                            )
+                        }.onFailure { err ->
+                            exportMessageChannel.trySend(
+                                "Failed to save CSV: ${err.message ?: "Unable to write file"}"
+                            )
+                        }
+                    }
+                }
+            }
+
+            val onSaveCsvPayload: (CsvExportPayload) -> Unit = { payload ->
+                pendingCsvPayload = payload
+                createCsvLauncher.launch(payload.fileName)
+            }
+
+            val onShareCsvPayload: (CsvExportPayload) -> Unit = { payload ->
+                coroutineScope.launch {
+                    PortfolioCsvExporter.writeCsvToShareFile(
+                        context = applicationContext,
+                        fileName = payload.fileName,
+                        csvContent = payload.content,
+                    ).onSuccess { shareUri ->
+                        launchCsvShareIntent(
+                            context = this@MainActivity,
+                            fileName = payload.fileName,
+                            shareUri = shareUri,
+                        )
+                    }.onFailure { err ->
+                        exportMessageChannel.trySend(
+                            "Unable to share CSV: ${err.message ?: "Export error"}"
+                        )
+                    }
+                }
+            }
 
             val legacyDeviceCredentialLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.StartActivityForResult(),
@@ -177,6 +241,9 @@ class MainActivity : FragmentActivity() {
                         StockFolioApp(
                             themeMode = themeMode,
                             appLockController = appLockViewModel.controller,
+                            exportMessages = exportMessages,
+                            onSaveCsvPayload = onSaveCsvPayload,
+                            onShareCsvPayload = onShareCsvPayload,
                             onSelectThemeMode = themeViewModel::setThemeMode,
                             onCycleThemeMode = themeViewModel::cycleThemeMode,
                         )

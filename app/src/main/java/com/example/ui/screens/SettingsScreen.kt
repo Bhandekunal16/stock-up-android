@@ -19,6 +19,7 @@ import androidx.compose.material.icons.outlined.BrightnessAuto
 import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.Dns
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.WarningAmber
@@ -71,6 +72,7 @@ fun SettingsScreen(
     appLockUiState: AppLockUiState,
     appLockController: AppLockController,
     onSelectThemeMode: (ThemeMode) -> Unit,
+    onExportCsv: () -> Unit,
     onCheckServerStatus: () -> Unit,
     onResetAllSnapshots: () -> Unit,
 ) {
@@ -248,7 +250,56 @@ fun SettingsScreen(
             }
         }
 
-        // 2. Configured Backend Endpoints
+        // 2. Portfolio Data Export (CSV)
+        item {
+            val snapshotCount = uiState.snapshots.size
+            val latestStocksCount = uiState.latestSnapshot?.stocks?.size ?: 0
+            val hasExportableData = uiState.snapshots.isNotEmpty()
+            GraphiteSectionCard(
+                title = "Data Export",
+                subtitle = "Export holdings & snapshot history to a local CSV file",
+                headerAction = {
+                    StatusBadge(
+                        label = if (hasExportableData) "$snapshotCount snapshots" else "No data",
+                        color = if (hasExportableData) GraphiteAccentViolet else GraphiteTextSecondary,
+                        showDot = false,
+                    )
+                },
+            ) {
+                Text(
+                    text = if (hasExportableData) {
+                        "Ready to export $latestStocksCount latest holdings or full history across $snapshotCount tracked snapshot${if (snapshotCount == 1) "" else "s"} for Excel, Google Sheets, or personal tracking."
+                    } else {
+                        "Upload at least one portfolio snapshot to enable CSV export."
+                    },
+                    color = GraphiteTextSecondary,
+                    fontSize = 13.sp,
+                )
+                Button(
+                    onClick = onExportCsv,
+                    enabled = hasExportableData,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GraphiteAccentViolet,
+                        contentColor = GraphiteOnAccent,
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp)
+                        .testTag("settings_export_csv_button"),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.FileDownload,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Export Portfolio to CSV", fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
+
+        // 3. Configured Backend Endpoints
         item {
             GraphiteSectionCard(
                 title = "Configured Endpoints",

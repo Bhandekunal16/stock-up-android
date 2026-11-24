@@ -69,8 +69,10 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -88,7 +90,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.data.model.PortfolioSnapshot
 import com.example.data.preferences.ThemeMode
+import com.example.ui.components.PortfolioExportDialog
 import com.example.ui.screens.AnalyticsScreen
 import com.example.ui.screens.DashboardScreen
 import com.example.ui.screens.LiveScreenerScreen
@@ -110,6 +114,9 @@ import com.example.ui.viewmodel.AppLockController
 import com.example.ui.viewmodel.PortfolioViewModel
 import com.example.ui.viewmodel.ScreenerViewModel
 import com.example.ui.viewmodel.SignalsViewModel
+import com.example.util.CsvExportPayload
+import com.example.util.CsvExportScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 object Routes {
@@ -193,11 +200,19 @@ private val topDestinations = listOf(
     ),
 )
 
+private data class ExportDialogRequest(
+    val initialScope: CsvExportScope,
+    val targetSnapshot: PortfolioSnapshot? = null,
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StockFolioApp(
     themeMode: ThemeMode,
     appLockController: AppLockController,
+    exportMessages: Flow<String>,
+    onSaveCsvPayload: (CsvExportPayload) -> Unit,
+    onShareCsvPayload: (CsvExportPayload) -> Unit,
     onSelectThemeMode: (ThemeMode) -> Unit,
     onCycleThemeMode: () -> Unit,
     portfolioViewModel: PortfolioViewModel = viewModel(),
@@ -214,6 +229,8 @@ fun StockFolioApp(
     val signalsState by signalsViewModel.uiState.collectAsStateWithLifecycle()
     val screenerState by screenerViewModel.uiState.collectAsStateWithLifecycle()
     val appLockState by appLockController.uiState.collectAsStateWithLifecycle()
+
+    var exportDialogRequest by remember { mutableStateOf<ExportDialogRequest?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -233,6 +250,22 @@ fun StockFolioApp(
         appLockController.messages.collect { msg ->
             snackbarHostState.showSnackbar(msg)
         }
+    }
+    LaunchedEffect(exportMessages) {
+        exportMessages.collect { msg ->
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
+
+    exportDialogRequest?.let { request ->
+        PortfolioExportDialog(
+            snapshots = portfolioState.snapshots,
+            initialScope = request.initialScope,
+            targetSnapshot = request.targetSnapshot,
+            onSaveToDevice = onSaveCsvPayload,
+            onShareCsv = onShareCsvPayload,
+            onDismiss = { exportDialogRequest = null },
+        )
     }
 
     val screenTitle = when {
@@ -419,6 +452,9 @@ fun StockFolioApp(
                                     kpiColumns = kpiColumns,
                                     onRetry = { portfolioViewModel.loadAllSnapshots(isManualRefresh = false) },
                                     onNavigateToUpload = { navigateToTopLevel(Routes.UPLOAD) },
+                                    onExportCsv = {
+                                        exportDialogRequest = ExportDialogRequest(CsvExportScope.LATEST_HOLDINGS)
+                                    },
                                 )
                             }
                             composable(Routes.HISTORY) {
@@ -428,6 +464,9 @@ fun StockFolioApp(
                                     onNavigateToUpload = { navigateToTopLevel(Routes.UPLOAD) },
                                     onSelectSnapshot = { date ->
                                         navController.navigate(Routes.historyDetail(date))
+                                    },
+                                    onExportCsv = {
+                                        exportDialogRequest = ExportDialogRequest(CsvExportScope.ALL_HISTORY_HOLDINGS)
                                     },
                                 )
                             }
@@ -442,6 +481,12 @@ fun StockFolioApp(
                                     kpiColumns = kpiColumns,
                                     onLoadSnapshot = portfolioViewModel::loadSnapshotByDate,
                                     onBack = { navController.popBackStack() },
+                                    onExportSnapshotCsv = { snap ->
+                                        exportDialogRequest = ExportDialogRequest(
+                                            initialScope = CsvExportScope.SINGLE_SNAPSHOT,
+                                            targetSnapshot = snap,
+                                        )
+                                    },
                                 )
                             }
                             composable(Routes.ANALYTICS) {
@@ -482,6 +527,9 @@ fun StockFolioApp(
                                     appLockUiState = appLockState,
                                     appLockController = appLockController,
                                     onSelectThemeMode = onSelectThemeMode,
+                                    onExportCsv = {
+                                        exportDialogRequest = ExportDialogRequest(CsvExportScope.LATEST_HOLDINGS)
+                                    },
                                     onCheckServerStatus = portfolioViewModel::checkServerStatus,
                                     onResetAllSnapshots = portfolioViewModel::resetAllSnapshots,
                                 )

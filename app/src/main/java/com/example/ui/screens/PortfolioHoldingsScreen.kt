@@ -21,6 +21,7 @@ import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.CloudUpload
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Percent
 import androidx.compose.material.icons.outlined.Savings
@@ -30,6 +31,7 @@ import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -84,6 +86,7 @@ fun PortfolioHoldingsScreen(
     kpiColumns: Int,
     onRetry: () -> Unit,
     onNavigateToUpload: () -> Unit,
+    onExportCsv: () -> Unit,
 ) {
     when (val load = uiState.loadState) {
         is PortfolioLoadState.Loading -> LoadingStateBox("Loading holdings...")
@@ -99,7 +102,11 @@ fun PortfolioHoldingsScreen(
                     onAction = onNavigateToUpload,
                 )
             } else {
-                HoldingsContent(latest = latest, kpiColumns = kpiColumns)
+                HoldingsContent(
+                    latest = latest,
+                    kpiColumns = kpiColumns,
+                    onExportCsv = onExportCsv,
+                )
             }
         }
     }
@@ -110,6 +117,7 @@ fun PortfolioHoldingsScreen(
 private fun HoldingsContent(
     latest: PortfolioSnapshot,
     kpiColumns: Int,
+    onExportCsv: () -> Unit,
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var sortField by rememberSaveable { mutableStateOf(HoldingSortField.CURRENT_VALUE) }
@@ -192,27 +200,58 @@ private fun HoldingsContent(
 
         item {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = { Text("Search holdings by company...", color = GraphiteTextMuted) },
-                    leadingIcon = {
-                        Icon(Icons.Outlined.Search, contentDescription = "Search", tint = GraphiteTextSecondary)
-                    },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GraphiteAccentViolet,
-                        unfocusedBorderColor = GraphiteBorder,
-                        focusedContainerColor = GraphiteNavSurface,
-                        unfocusedContainerColor = GraphiteNavSurface,
-                        focusedTextColor = GraphiteTextPrimary,
-                        unfocusedTextColor = GraphiteTextPrimary,
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("holdings_search_input"),
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        placeholder = { Text("Search holdings...", color = GraphiteTextMuted) },
+                        leadingIcon = {
+                            Icon(Icons.Outlined.Search, contentDescription = "Search", tint = GraphiteTextSecondary)
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = GraphiteAccentViolet,
+                            unfocusedBorderColor = GraphiteBorder,
+                            focusedContainerColor = GraphiteNavSurface,
+                            unfocusedContainerColor = GraphiteNavSurface,
+                            focusedTextColor = GraphiteTextPrimary,
+                            unfocusedTextColor = GraphiteTextPrimary,
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("holdings_search_input"),
+                    )
+
+                    OutlinedButton(
+                        onClick = onExportCsv,
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, GraphiteBorder),
+                        modifier = Modifier
+                            .padding(vertical = 2.dp)
+                            .size(width = 88.dp, height = 52.dp)
+                            .testTag("holdings_export_csv_button"),
+                        contentPadding = PaddingValues(horizontal = 10.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.FileDownload,
+                            contentDescription = "Export holdings CSV",
+                            tint = GraphiteAccentViolet,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Text(
+                            text = " CSV",
+                            color = GraphiteTextPrimary,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                        )
+                    }
+                }
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
